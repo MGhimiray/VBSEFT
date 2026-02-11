@@ -607,9 +607,9 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         
         # Set output directory
         if (isData == "true"):
-            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_VBS/matrix_method/{0}/ntuple/".format(dirT2)
+            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/{0}/ntuple/".format(dirT2)
         elif (isData == "false"):
-            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_VBS/OriginalTT/{0}/ntuple/".format(dirT2)
+            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{0}/ntuple/".format(dirT2)
 
         os.makedirs(output_dir, exist_ok=True)
 
@@ -633,6 +633,9 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histo[107][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(107,x), "histo_{0}_{1}".format(107,x),12,500,3500), "vbs_mjj","weight7")
         histo[108][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(108,x), "histo_{0}_{1}".format(108,x),12,500,3500), "vbs_mjj","weightWSUnc0")
         histo[109][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(109,x), "histo_{0}_{1}".format(109,x),12,500,3500), "vbs_mjj","weightWSUnc1")
+        histo[110][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(110,x), "histo_{0}_{1}".format(110,x),12,500,3500), "MT","weight")
+        histo[111][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(111,x), "histo_{0}_{1}".format(111,x),20, 0, 500), "M01","weight")
+        histo[112][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(112,x), "histo_{0}_{1}".format(112,x),20, 0, 500), "M1T","weight")
 
         BinXF1 = 10
         minXF1 = 0
@@ -998,9 +1001,9 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
       
 
     if (isData == "true"):
-        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_VBS/matrix_method/{0}/histo/fillhisto_sswwAnalysis/".format(dirT2)
+        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/{0}/histo/fillhisto_sswwAnalysis/".format(dirT2)
     elif (isData == "false"):
-        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_VBS/OriginalTT/{0}/histo/fillhisto_sswwAnalysis/".format(dirT2) # Defining output directory for histograms
+        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{0}/histo/fillhisto_sswwAnalysis/".format(dirT2) # Defining output directory for histograms
 
     os.makedirs(output_dir2, exist_ok=True)
     myfile = ROOT.TFile("{3}/fillhisto_sswwAnalysis1001_sample{0}_year{1}1_job{2}.root".format(count,year,whichJob,output_dir2),'RECREATE')
