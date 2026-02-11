@@ -2681,10 +2681,27 @@ int print_info(const UInt_t run, const UInt_t lumi, const ULong64_t event){
  return pz;
  }
 
+ Vec_f Getpx(const Vec_f& pt, const Vec_f& phi) {
+ const auto n = std::min(pt.size(), phi.size());
+ Vec_f px(n);
+ for (size_t i = 0; i < n; i++) {
+   px[i] = pt[i] * std::cos(phi[i]);
+ }
+ return px;
+ }
+
+ Vec_f Getpy(const Vec_f& pt, const Vec_f& phi) {
+ const auto n = std::min(pt.size(), phi.size());
+ Vec_f py(n);
+ for (size_t i = 0; i < n; i++) {
+   py[i] = pt[i] * std::sin(phi[i]);
+ }
+ return py;
+ }
 
 float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const Vec_f& mu_mass, const Vec_f& mu_pz,
                      const Vec_f& el_pt, const Vec_f& el_eta, const Vec_f& el_phi, const Vec_f& el_mass, const Vec_f& el_pz,
-                     const Vec_f& metpT, const Vec_f& metphi, unsigned int var){
+                      const float metpT,  const float metphi,  const float mll,  const float ptll, unsigned int var){
    if(mu_pt.size() + el_pt.size() != 2) return 0;
 
    float pt[2], eta[2], phi[2], mass[2], pz[2];
@@ -2710,19 +2727,35 @@ float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const
     float py2 = pt[1]*sin(phi[1]);
     float px = px1 + px2;
     float py = py1 + py2;
-    float pz = pz[0] + pz[1];
+    float pztot = pz[0] + pz[1];
     float E1 = sqrt(pt[0]*pt[0] + pz[0]*pz[0] + mass[0]*mass[0]);
     float E2 = sqrt(pt[1]*pt[1] + pz[1]*pz[1] + mass[1]*mass[1]);
     float E = E1 + E2;
-    float mll2 = E*E - (px*px + py*py + pz*pz);   
-    mll2 = max(0, mll2)
-    float ptll2 = px*px + py*py;
-    float ETll  = sqrt(mll2 + ptll2)
-    float METx = metpT[0]*cos(metphi[0]);
-    float METy = metpT[0]*sin(metphi[0]);
-    float mt2 = mll2 + 2*(ETll*metpT[0] - (px*METx + py*METy));
-    mt2 = max(0, mt2);
-    float mt = sqrt(mt2);
-    return mt;
-  }
+    float METx = metpT*cos(metphi);
+    float METy = metpT*sin(metphi);
 
+ // Transverse mass
+    float mll2 = E*E - (px*px + py*py + pztot*pztot);   
+    mll2 = max(0.f, mll2);
+    float ptll2 = px*px + py*py;
+    float ETll  = sqrt(mll2 + ptll2);
+    float mt2 = mll2 + 2*(ETll*metpT - (px*METx + py*METy));
+    mt2 = max(0.f, mt2);
+    float mt = sqrt(mt2);
+
+// M01  variables
+    float M01first = (pt[0] + pt[1] + metpT)*(pt[0] + pt[1] + metpT);
+    float M01second = (px1 + px2 + METx)*(px1 + px2 + METx) + (py1 + py2 + METy)*(py1 + py2 + METy);
+    float M01 = sqrt(M01first - M01second);
+
+// M1T variables
+    float M1Tfirst = sqrt(mll*mll + ptll*ptll) + metpT;
+    float M1Tsecond = (px + METx)*(px + METx) + (py + METy)*(py + METy);
+    float M1T = sqrt(M1Tfirst*M1Tfirst - M1Tsecond);
+    double theVar = 0;
+    if     (var == 1) theVar = mt;
+    else if(var == 2) theVar = M01;
+    else if(var == 3) theVar = M1T;
+   
+    return theVar;
+  }

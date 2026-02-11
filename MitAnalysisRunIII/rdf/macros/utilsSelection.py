@@ -559,9 +559,13 @@ def make2LVar(df,postFixMu,postFixEl):
               .Define("minPMET{0}".format(postFix), "compute_nl_var(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_charge, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_charge, PuppiMET_pt, PuppiMET_phi,8)".format(postFixMu,postFixEl))
               .Define("ptww{0}".format(postFix), "compute_nl_var(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_charge, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_charge, PuppiMET_pt, PuppiMET_phi,9)".format(postFixMu,postFixEl))
               .Define("mcoll{0}".format(postFix), "compute_nl_var(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_charge, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_charge, PuppiMET_pt, PuppiMET_phi,10)".format(postFixMu,postFixEl))
+              .Define("MT{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 1)".format(postFixMu,postFixEl))
+              .Define("M01{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 2)".format(postFixMu,postFixEl))
+              .Define("M1T{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 3)".format(postFixMu,postFixEl))
               )
 
     return dftag
+
 
 def selection2LVar(df,year,isData):
 
@@ -739,7 +743,10 @@ def selectionElMu(df,year,fake_mu,tight_mu,fake_el,tight_el):
               .Define("fake_mu"                   ,"{0}".format(fake_mu))
               .Define("fake_Muon_pt"              ,"Muon_pt[fake_mu]")
               .Define("fake_Muon_eta"             ,"Muon_eta[fake_mu]")
+              .Define("fake_Muon_pz"              ,"Getpz(fake_Muon_pt, fake_Muon_eta)")
               .Define("fake_Muon_phi"             ,"Muon_phi[fake_mu]")
+              .Define("fake_muon_px"              ,"Getpx(fake_Muon_pt, fake_Muon_phi)")
+              .Define("fake_muon_py"              ,"Getpy(fake_Muon_pt, fake_Muon_phi)")
               .Define("fake_Muon_dxy"             ,"Muon_dxy[fake_mu]")
               .Define("fake_Muon_dz"              ,"Muon_dz[fake_mu]")
               .Define("fake_Muon_sip3d"           ,"Muon_sip3d[fake_mu]")
@@ -760,7 +767,7 @@ def selectionElMu(df,year,fake_mu,tight_mu,fake_el,tight_el):
               .Define("fake_Muon_miniPFRelIso_all","Muon_miniPFRelIso_all[fake_mu]")
               .Define("fake_Muon_nStations"       ,"Muon_nStations[fake_mu]")
               .Define("fake_Muon_nTrackerLayers"  ,"Muon_nTrackerLayers[fake_mu]")
-              .Define("fake_Muon_pfRelIso03_chg"  ,"Muon_pfRelIso03_chg[fake_mu]")")
+              .Define("fake_Muon_pfRelIso03_chg"  ,"Muon_pfRelIso03_chg[fake_mu]")
               .Define("fake_Muon_p"               ,"computeMomentum(fake_Muon_pt,fake_Muon_eta,fake_Muon_phi,fake_Muon_mass)")
               .Define("fakeable_mu"               ,"(abs(fake_Muon_dxy) < 0.05 && abs(fake_Muon_dz) < 0.10 && abs(fake_Muon_eta) < 2.4 && fake_Muon_pt > 10 && fake_Muon_looseId == true && fake_Muon_mediumId == true && fake_Muon_pfIsoId >= 1 && fake_Muon_jetRelIso < 0.5)")
               .Define("tight_mu"                  ,"{0}".format(tight_mu))
@@ -769,7 +776,10 @@ def selectionElMu(df,year,fake_mu,tight_mu,fake_el,tight_el):
               .Define("fake_el"                           ,"{0}".format(fake_el))
               .Define("fake_Electron_pt"                  ,"Electron_pt[fake_el]")
               .Define("fake_Electron_eta"                 ,"Electron_eta[fake_el]")
+              .Define("fake_Electron_pz"                  ,"Getpz(fake_Electron_pt, fake_Electron_eta)")
               .Define("fake_Electron_phi"                 ,"Electron_phi[fake_el]")
+              .Define("fake_Electron_px"                  ,"Getpx(fake_Electron_pt, fake_Electron_phi)")
+              .Define("fake_Electron_py"                  ,"Getpy(fake_Electron_pt, fake_Electron_phi)")
               .Define("fake_Electron_mass"                ,"Electron_mass[fake_el]")
               .Define("fake_Electron_charge"              ,"Electron_charge[fake_el]")
               .Define("fake_Electron_jetRelIso"           ,"Electron_jetRelIso[fake_el]")
