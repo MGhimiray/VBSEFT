@@ -2701,7 +2701,7 @@ int print_info(const UInt_t run, const UInt_t lumi, const ULong64_t event){
 
 float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const Vec_f& mu_mass, const Vec_f& mu_pz,
                      const Vec_f& el_pt, const Vec_f& el_eta, const Vec_f& el_phi, const Vec_f& el_mass, const Vec_f& el_pz,
-                      const float metpT,  const float metphi,  const float mll,  const float ptll, unsigned int var){
+                      const float metpT,  const float metphi, const float mll,  const float ptll, unsigned int var){
    if(mu_pt.size() + el_pt.size() != 2) return 0;
 
    float pt[2], eta[2], phi[2], mass[2], pz[2];
@@ -2725,6 +2725,7 @@ float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const
     float py1 = pt[0]*sin(phi[0]);
     float px2 = pt[1]*cos(phi[1]);  
     float py2 = pt[1]*sin(phi[1]);
+ //   float pzmiss = metpT*sinh(metphi);
     float px = px1 + px2;
     float py = py1 + py2;
     float pztot = pz[0] + pz[1];
@@ -2734,14 +2735,20 @@ float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const
     float METx = metpT*cos(metphi);
     float METy = metpT*sin(metphi);
 
- // Transverse mass
-    float mll2 = E*E - (px*px + py*py + pztot*pztot);   
-    mll2 = max(0.f, mll2);
-    float ptll2 = px*px + py*py;
-    float ETll  = sqrt(mll2 + ptll2);
-    float mt2 = mll2 + 2*(ETll*metpT - (px*METx + py*METy));
-    mt2 = max(0.f, mt2);
-    float mt = sqrt(mt2);
+//    float mll2 = E*E - (px*px + py*py + pztot*pztot);   
+//    mll2 = max(0.f, mll2);
+//    float ptll2 = px*px + py*py;
+//    float ETll  = sqrt(mll2 + ptll2);
+//    float mt2 = mll2 + 2*(ETll*metpT - (px*METx + py*METy));
+//    mt2 = max(0.f, mt2);
+//    float mt = sqrt(mt2);
+
+
+// Transverse mass
+    
+    float MTfirst = E1+E2+metpT;
+    float MTsecond = pztot;
+    float MT = sqrt(MTfirst*MTfirst - MTsecond*MTsecond);
 
 // M01  variables
     float M01first = (pt[0] + pt[1] + metpT)*(pt[0] + pt[1] + metpT);
@@ -2753,7 +2760,7 @@ float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const
     float M1Tsecond = (px + METx)*(px + METx) + (py + METy)*(py + METy);
     float M1T = sqrt(M1Tfirst*M1Tfirst - M1Tsecond);
     double theVar = 0;
-    if     (var == 1) theVar = mt;
+    if     (var == 1) theVar = MT;
     else if(var == 2) theVar = M01;
     else if(var == 3) theVar = M1T;
    
