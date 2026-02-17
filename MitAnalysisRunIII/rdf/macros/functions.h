@@ -638,35 +638,7 @@ Vec_f compute_ELEPT_Unc(const int year, const int type, const Vec_i& gain, const
   bool debug = false;
   if(debug) printf("eleEnergy: %lu %d\n",pt.size(),type);
 
-  const bool applySSEtDependent = true;
-
-  if(applySSEtDependent == false &&
-     (year == 20220 || year == 20221 || year == 20230 || year == 20231 || year == 20240)){
-    if    (type == 10) { // data
-      for(unsigned int i=0;i<pt.size();i++) {
-        new_pt[i] = pt[i]*corrSFs.eval_electronScale((char*)"total_correction", gain[i], (double)run, eta[i], r9[i], pt[i]);
-        if(debug) printf("eleSS(%d)-%d: %.3f %.3f\n",i,type,pt[i],new_pt[i]);
-      }
-    }
-    else if(type == 0) { // MC default
-      for(unsigned int i=0;i<pt.size();i++) {
-        double rho = corrSFs.eval_electronSmearing((char*)"rho", eta[i], r9[i]);
-        new_pt[i] = pt[i]*gRandom->Gaus(1.0,rho);
-        if(debug) printf("eleSS(%d)-%d: %.3f %.3f %.6f\n",i,type,pt[i],new_pt[i],rho);
-      }
-    }
-    else if(type == -1 || type == +1) { // MC smearing uncertainty
-      for(unsigned int i=0;i<pt.size();i++) {
-        double rho     = corrSFs.eval_electronSmearing((char*)"rho", eta[i], r9[i]);
-        double rho_unc = corrSFs.eval_electronSmearing((char*)"err_rho", eta[i], r9[i]);
-        double scale_unc = corrSFs.eval_electronScale((char*)"total_uncertainty", gain[i], 1.0, eta[i], r9[i], pt[i]);
-        new_pt[i] = pt[i]*gRandom->Gaus(1.0,rho+(double)type*(rho_unc+scale_unc));
-        if(debug) printf("eleSS(%d)-%d: %.3f %.3f %.6f %.6f %.6f\n",i,type,pt[i],new_pt[i],rho,rho_unc,scale_unc);
-      }
-    }
-  }
-  else if(applySSEtDependent == true &&
-     (year == 20220 || year == 20221 || year == 20230 || year == 20231 || year == 20240)){
+  if(year == 20220 || year == 20221 || year == 20230 || year == 20231 || year == 20240){
     if    (type == 10) { // data
       for(unsigned int i=0;i<pt.size();i++) {
         new_pt[i] = pt[i]*corrSFs.eval_electronEtDependentScale((char*)"scale", (double)run, eta[i], r9[i], pt[i], gain[i]);
@@ -697,6 +669,7 @@ Vec_f compute_ELEPT_Unc(const int year, const int type, const Vec_i& gain, const
 
   return new_pt;
 }
+
 
 Vec_f compute_PHOPT_Unc(const Vec_f& ph_pt, int type){
   Vec_f new_ph_pt(ph_pt.size(), 1.0);
@@ -1776,6 +1749,24 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
   return 0.0;
 }
 
+//Rpt variable
+
+    float GetRpt(const Vec_f& pt, const Vec_f& mu_pt, const Vec_f& el_pt) {
+    float r = 0;
+    float ptl1 = 0;
+    float ptl2 = 0;
+    if(mu_pt.size() == 2){
+      ptl1 = mu_pt[0]; ptl2 = mu_pt[1];
+    }
+    if(el_pt.size() == 2){
+      ptl1 = el_pt[0]; ptl2 = el_pt[1];
+    }
+    if(el_pt.size() == 1 && mu_pt.size() == 1){
+      ptl1 = mu_pt[0]; ptl2 = el_pt[0]; 
+    }
+    float rpt = (ptl1*ptl2)/(pt[0]*pt[1]);
+    return log(rpt);
+  }
 
 // Jet-lepton variables
 float compute_jet_lepton_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass, 
@@ -1786,6 +1777,7 @@ float compute_jet_lepton_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass,
   if(mu_pt.size() + el_pt.size() == 0) return -1;
   if(pt.size() < 2) return -1;
 
+  // for jets
   PtEtaPhiMVector p1(pt[0], eta[0], phi[0], mass[0]);
   PtEtaPhiMVector p2(pt[1], eta[1], phi[1], mass[1]);
   //if(p1.Pt() < p2.Pt()) printf("Pt jet reversed!\n");
@@ -1833,6 +1825,7 @@ float compute_jet_lepton_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass,
   else if(var == 5) theVar = fabs(p4momVV.Eta()-p1.Eta());
   else if(var == 6) theVar = fabs(p4momVV.Eta()-p2.Eta());
   else if(var == 7) theVar = (p4momVV.Pt()-(p1+p2).Pt())/(p1+p2).Pt();
+  else if(var == 8) theVar = GetRpt(pt, mu_pt, el_pt);
   return theVar;
 }
 
@@ -2763,6 +2756,8 @@ float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const
     if     (var == 1) theVar = MT;
     else if(var == 2) theVar = M01;
     else if(var == 3) theVar = M1T;
-   
+    else if(var == 4) theVar = log(MT);
+    else if(var == 5) theVar = log(M01);
+    else if(var == 6) theVar = log(M1T);
     return theVar;
   }

@@ -6,8 +6,8 @@ command -v hadd >/dev/null || { echo "ERROR: hadd not found in PATH"; exit 1; }
 
 # for dir in {1001..1009}; do
 for dir in 1001; do
-  inputdir="/mnt/home/mghimiray/VBSStudies/Outputs_VBS/matrix_method/${dir}/histo/fillhisto_sswwAnalysis"
-  outdir="/mnt/home/mghimiray/VBSStudies/Outputs_VBS/OriginalTT/${dir}/histo/fillhisto_sswwAnalysis"
+  inputdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${dir}/histo/fillhisto_sswwAnalysis"
+  outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/${dir}/histo/fillhisto_sswwAnalysis"
   mkdir -p "$outdir"
 
   for i in {0..9}; do

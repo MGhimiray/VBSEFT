@@ -200,6 +200,7 @@ def makeJES(df,year,postFix,bTagSel,jetEtaCut):
               .Define("vbs_detavvj1{0}".format(postFix), "compute_jet_lepton_var(vbs_Jet_pt{0}, vbs_Jet_eta, vbs_Jet_phi, vbs_Jet_mass, fake_Muon_pt, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Electron_pt, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, PuppiMET_pt{1}, PuppiMET_phi{2}, 5)".format(postFix,postFitMet,postFitMet))
               .Define("vbs_detavvj2{0}".format(postFix), "compute_jet_lepton_var(vbs_Jet_pt{0}, vbs_Jet_eta, vbs_Jet_phi, vbs_Jet_mass, fake_Muon_pt, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Electron_pt, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, PuppiMET_pt{1}, PuppiMET_phi{2}, 6)".format(postFix,postFitMet,postFitMet))
               .Define("vbs_ptbalance{0}".format(postFix),"compute_jet_lepton_var(vbs_Jet_pt{0}, vbs_Jet_eta, vbs_Jet_phi, vbs_Jet_mass, fake_Muon_pt, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Electron_pt, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, PuppiMET_pt{1}, PuppiMET_phi{2}, 7)".format(postFix,postFitMet,postFitMet))
+              .Define("Rpt{0}".format(postFix),"compute_jet_lepton_var(vbs_Jet_pt{0}, vbs_Jet_eta, vbs_Jet_phi, vbs_Jet_mass, fake_Muon_pt, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Electron_pt, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, PuppiMET_pt{1}, PuppiMET_phi{2}, 8)".format(postFix,postFitMet,postFitMet))
               )
 
     return dftag
@@ -562,6 +563,9 @@ def make2LVar(df,postFixMu,postFixEl):
               .Define("MT{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 1)".format(postFixMu,postFixEl))
               .Define("M01{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 2)".format(postFixMu,postFixEl))
               .Define("M1T{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 3)".format(postFixMu,postFixEl))
+              .Define("logMT{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 4)".format(postFixMu,postFixEl))
+              .Define("logM01{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 5)".format(postFixMu,postFixEl))
+              .Define("logM1T{0}".format(postFix), "Get_MT(fake_Muon_pt{0}, fake_Muon_eta, fake_Muon_phi, fake_Muon_mass, fake_Muon_pz, fake_Electron_pt{1}, fake_Electron_eta, fake_Electron_phi, fake_Electron_mass, fake_Electron_pz, PuppiMET_pt, PuppiMET_phi, mll, ptll, 6)".format(postFixMu,postFixEl))
               )
 
     return dftag
@@ -887,7 +891,7 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
               .Define("fake_Electron_genPartFlav","Electron_genPartFlav[fake_el]")
               .Define("fake_Electron_genPartIdx","Electron_genPartIdx[fake_el]")
               .Define("weightPURecoSF","compute_PURecoSF(fake_Muon_pt,fake_Muon_eta,fake_Electron_pt,fake_Electron_eta,Pileup_nTrueInt,0)")
-              .Define("weightMuonSF","compute_MuonSF(fake_Muon_pt,fake_Muon_eta)")
+              .Define("weightMuonSF","compute_MuonSF(fake_Muon_pt,fake_Muon_eta, 0.0)")
               .Define("weightElectronSF","compute_ElectronSF(fake_Electron_pt,fake_Electron_eta)")
               .Define("weightTriggerSF","compute_TriggerSF(ptl1,ptl2,etal1,etal2,ltype,0)")
              #.Define("weightTriggerSF","compute_TriggerForSingleLegsSF(ptl1,ptl2,etal1,etal2,ltype)")

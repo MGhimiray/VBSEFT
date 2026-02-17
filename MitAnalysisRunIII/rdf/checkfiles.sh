@@ -8,7 +8,7 @@ set -uo pipefail
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
 
-outdir="/mnt/home/mghimiray/VBSStudies/Outputs_VBS/OriginalTT/${whichana}/histo/fillhisto_sswwAnalysis"
+outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/${whichana}/histo/fillhisto_sswwAnalysis"
 
 echo "== Check files =="
 echo " year     : $year"

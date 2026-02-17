@@ -6,10 +6,10 @@ ROOT.PyConfig.DisableRootLogon = True
 
 if __name__ == "__main__":
     dir = "1001"
-    base = f"/mnt/home/mghimiray/VBSStudies/Outputs_VBS/OriginalTT/{dir}/histo/fillhisto_sswwAnalysis"
+    base = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/histo/fillhisto_sswwAnalysis"
     path = "fillhisto_sswwAnalysis"
-    year = 20240
-    output = f"/mnt/home/mghimiray/VBSStudies/Outputs_VBS/EFT2026/{dir}/merge1"
+    year = 20231
+    output = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/merge1"
     mkdir = output
     if not os.path.exists(mkdir):
         os.makedirs(mkdir)

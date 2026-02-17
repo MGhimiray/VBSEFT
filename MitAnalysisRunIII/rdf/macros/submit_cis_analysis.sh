@@ -21,3 +21,4 @@ which_job=$3
 python3 sswwAnalysis.py --year="$years" --process="$processes" --whichJob="$which_job"
 #python3 wzAnalysis.py --year="$years" --process="$processes" --whichJob="$which_job"
 #python3 sswwAnalysis.py --year=20220 --process=1022 --whichJob=0
+#python3 sswwAnalysis.py --year=20220 --process=100 --whichJob=0
