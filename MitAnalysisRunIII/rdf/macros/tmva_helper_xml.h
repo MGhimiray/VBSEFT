@@ -21,8 +21,8 @@ class tmva_xml {
             fReader->BookMVA(name, filename.c_str());
 
         }
-//        using Vec_f = std::vector<float>;  //monika added line
-        std::vector<float> Compute(const Vec_f &x) {
+//        using ROOT::RVecF = std::vector<float>;  //monika added line
+        std::vector<float> Compute(const ROOT::RVecF &x) {
 
             if (x.size() != fVariables.size())
                 throw std::runtime_error("Size of input vector is not equal to number of variables.");
@@ -73,8 +73,8 @@ class tmva_helper_xml {
                 interpreters_.emplace_back(tmp);
             }
         }
- //       using Vec_f = std::vector<float>;   //Monika added line
-        std::vector<float> operator()(unsigned int slot, const Vec_f vars) {
+ //       using ROOT::RVecF = std::vector<float>;   //Monika added line
+        std::vector<float> operator()(unsigned int slot, const ROOT::RVecF vars) {
 			return interpreters_[slot]->Compute(vars);
         }
 

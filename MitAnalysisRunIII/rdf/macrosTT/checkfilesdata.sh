@@ -44,6 +44,10 @@ case "$year" in
     samples["20220"]="1001 1002 1011 1012 1021 1022 1023 1031 1032 1033 1042 1043"
     samples["20221"]="1024 1025 1026 1034 1035 1036 1044 1045 1046"
     ;;
+  2025)
+    tags=(20250)
+    samples["20250"]="1021 1022 1023 1024 1025 1026 1031 1032 1033 1034 1035 1036 1041 1042 1043 1044 1045 1046"
+    ;;
   *)
     echo "Unsupported year: $year"
     exit 3
@@ -55,7 +59,7 @@ esac
 get_max_seen_job() {
   local tag="$1" sample="$2"
   shopt -s nullglob
-  local arr=( "$outdir"/fillhisto_sswwAnalysis1001_sample"${sample}"_year"${tag}"_job*.root )
+  local arr=( "$outdir"/fillhisto_sswwAnalysis1001_sample"${sample}"_year"${tag}"1_job*.root )
   shopt -u nullglob
   local max=-1 f
   for f in "${arr[@]}"; do
@@ -75,7 +79,7 @@ total_found=0
 for tag in "${tags[@]}"; do
   for sample in ${samples[$tag]}; do
     for job in $jobs_list; do
-      f="$outdir/fillhisto_sswwAnalysis${whichana}_sample${sample}_year${tag}_job${job}.root"
+      f="$outdir/fillhisto_sswwAnalysis1001_sample${sample}_year${tag}1_job${job}.root"
       (( total_expected++ ))
       if [[ -s "$f" ]]; then
         (( total_found++ ))

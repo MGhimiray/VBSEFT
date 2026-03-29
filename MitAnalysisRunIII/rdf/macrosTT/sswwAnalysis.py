@@ -9,7 +9,7 @@ from utilsSelection import selectionTauVeto, selectionPhoton, selectionJetMet, s
 import tmva_helper_xml
 
 correctionString = "_correction"
-makeDataCards = 1 # 1 (mjj diff), 2 (mll diff), 3 (njets diff), 4 (detajj diff), 5 (dphijj diff), 6 (mjj), 7 (mll), 8 (detajj), 9 (dphijj)
+makeDataCards = 0 # 1 (mjj diff), 2 (mll diff), 3 (njets diff), 4 (detajj diff), 5 (dphijj diff), 6 (mjj), 7 (mll), 8 (detajj), 9 (dphijj)
 genVBSSel = makeDataCards
 if(genVBSSel == 7):
     genVBSSel = 1
@@ -20,6 +20,8 @@ elif(genVBSSel == 8):
 elif(genVBSSel == 9):
     genVBSSel = 5
 
+if makeDataCards == 0:
+    dirT2 = "1000"
 if makeDataCards == 1:
     dirT2 = "1001"
 if makeDataCards == 2:
@@ -606,13 +608,21 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histo[107][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(107,x), "histo_{0}_{1}".format(107,x),12,500,3500), "vbs_mjj","weight7")
         histo[108][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(108,x), "histo_{0}_{1}".format(108,x),12,500,3500), "vbs_mjj","weightWSUnc0")
         histo[109][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(109,x), "histo_{0}_{1}".format(109,x),12,500,3500), "vbs_mjj","weightWSUnc1")
-        histo[112][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(112,x), "histo_{0}_{1}".format(112,x),20,0,1500), "MT","weight")
-        histo[113][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(113,x), "histo_{0}_{1}".format(113,x),20,0,1500), "M01","weight")
-        histo[114][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(114,x), "histo_{0}_{1}".format(114,x),20,0,1500), "M1T","weight")
-        histo[115][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(115,x), "histo_{0}_{1}".format(115,x),25,1.0,4.0), "logMT","weight")
-        histo[116][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(116,x), "histo_{0}_{1}".format(116,x),25,1.0,4.0), "logM01","weight")
-        histo[117][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(117,x), "histo_{0}_{1}".format(117,x),25,1.0,4.0), "logM1T","weight")
-        histo[118][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(118,x), "histo_{0}_{1}".format(118,x), 9, -2., 1.2), "Rpt","weight")
+        histo[112][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(112,x), "histo_{0}_{1}".format(112,x),20,0,3000), "MT","weight")
+        histo[113][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(113,x), "histo_{0}_{1}".format(113,x),20,0,3000), "M01","weight")
+        histo[114][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(114,x), "histo_{0}_{1}".format(114,x),20,0,3000), "M1T","weight")
+        histo[115][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(115,x), "histo_{0}_{1}".format(115,x),25,4.5,8.0), "logMT","weight")
+        histo[116][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(116,x), "histo_{0}_{1}".format(116,x),25,4.5,8.0), "logM01","weight")
+        histo[117][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(117,x), "histo_{0}_{1}".format(117,x),25,4.5,8.0), "logM1T","weight")
+        histo[118][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(118,x), "histo_{0}_{1}".format(118,x),9, -3., 3), "Rpt","weight")
+        histo[119][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(119,x), "histo_{0}_{1}".format(119,x),20,0,3000), "MT","weight")
+        histo[120][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(120,x), "histo_{0}_{1}".format(120,x),20,0,3000), "M01","weight")
+        histo[121][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(121,x), "histo_{0}_{1}".format(121,x),20,0,3000), "M1T","weight")
+        histo[122][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(122,x), "histo_{0}_{1}".format(122,x),25,4.5,8.0), "logMT","weight")
+        histo[123][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(123,x), "histo_{0}_{1}".format(123,x),25,4.5,8.0), "logM01","weight")
+        histo[124][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(124,x), "histo_{0}_{1}".format(124,x),25,4.5,8.0), "logM1T","weight")
+        histo[125][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(125,x), "histo_{0}_{1}".format(125,x),9, -3., 3), "Rpt","weight")
+
 
         BinXF1 = 10
         minXF1 = 0

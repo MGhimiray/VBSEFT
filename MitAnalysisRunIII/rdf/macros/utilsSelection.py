@@ -570,7 +570,6 @@ def make2LVar(df,postFixMu,postFixEl):
 
     return dftag
 
-
 def selection2LVar(df,year,isData):
 
     if(isData == "false"):
@@ -892,7 +891,7 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
               .Define("fake_Electron_genPartIdx","Electron_genPartIdx[fake_el]")
               .Define("weightPURecoSF","compute_PURecoSF(fake_Muon_pt,fake_Muon_eta,fake_Electron_pt,fake_Electron_eta,Pileup_nTrueInt,0)")
               .Define("weightMuonSF","compute_MuonSF(fake_Muon_pt,fake_Muon_eta, 0.0)")
-              .Define("weightElectronSF","compute_ElectronSF(fake_Electron_pt,fake_Electron_eta)")
+              .Define("weightElectronSF","compute_ElectronSF(fake_Electron_pt,fake_Electron_eta, 0.0)")
               .Define("weightTriggerSF","compute_TriggerSF(ptl1,ptl2,etal1,etal2,ltype,0)")
              #.Define("weightTriggerSF","compute_TriggerForSingleLegsSF(ptl1,ptl2,etal1,etal2,ltype)")
 
@@ -927,32 +926,48 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
         if(useBTaggingWeights == 1):
             print("BtagCorr/AddCorr: 1/1")
             dftag = (dftag
-                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
+                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
                      .Define("weightMuoCorr","weightMuoSFJSON*weightMuonSF")
                      .Define("weightEleCorr","weightEleSFJSON*weightElectronSF")
+                     .Define("weightMuonTightSFUp"  ,"weight/weightMuonSF*compute_MuonSF(fake_Muon_pt,fake_Muon_eta,+1.0)")
+                     .Define("weightMuonTightSFDown","weight/weightMuonSF*compute_MuonSF(fake_Muon_pt,fake_Muon_eta,-1.0)")
+                     .Define("weightElectronTightSFUp"  ,"weight/weightElectronSF*compute_ElectronSF(fake_Electron_pt,fake_Electron_eta,+1.0)")
+                     .Define("weightElectronTightSFDown","weight/weightElectronSF*compute_ElectronSF(fake_Electron_pt,fake_Electron_eta,-1.0)")
                     )
         else:
             print("BtagCorr/AddCorr: 0/1")
             dftag = (dftag
-                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
+                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
                      .Define("weightMuoCorr","weightMuoSFJSON*weightMuonSF")
                      .Define("weightEleCorr","weightEleSFJSON*weightElectronSF")
+                     .Define("weightMuonTightSFUp"  ,"weight/weightMuonSF*compute_MuonSF(fake_Muon_pt,fake_Muon_eta,+1.0)")
+                     .Define("weightMuonTightSFDown","weight/weightMuonSF*compute_MuonSF(fake_Muon_pt,fake_Muon_eta,-1.0)")
+                     .Define("weightElectronTightSFUp"  ,"weight/weightElectronSF*compute_ElectronSF(fake_Electron_pt,fake_Electron_eta,+1.0)")
+                     .Define("weightElectronTightSFDown","weight/weightElectronSF*compute_ElectronSF(fake_Electron_pt,fake_Electron_eta,-1.0)")
                     )
 
     else:
         if(useBTaggingWeights == 1):
             print("BtagCorr/AddCorr: 1/0")
             dftag = (dftag
-                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
+                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
                      .Define("weightMuoCorr","weightMuoSFJSON")
                      .Define("weightEleCorr","weightEleSFJSON")
+                     .Define("weightMuonTightSFUp"  ,"weight")
+                     .Define("weightMuonTightSFDown","weight")
+                     .Define("weightElectronTightSFUp"  ,"weight")
+                     .Define("weightElectronTightSFDown","weight")
                     )
         else:
             print("BtagCorr/AddCorr: 0/0")
             dftag = (dftag
-                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
+                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
                      .Define("weightMuoCorr","weightMuoSFJSON")
                      .Define("weightEleCorr","weightEleSFJSON")
+                     .Define("weightMuonTightSFUp"  ,"weight")
+                     .Define("weightMuonTightSFDown","weight")
+                     .Define("weightElectronTightSFUp"  ,"weight")
+                     .Define("weightElectronTightSFDown","weight")
                     )
 
     if(useBTaggingWeights == 1):

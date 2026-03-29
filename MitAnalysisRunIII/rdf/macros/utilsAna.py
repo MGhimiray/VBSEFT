@@ -5,8 +5,9 @@ from subprocess import call,check_output
 #from correctionlib import _core
 import correctionlib
 correctionlib.register_pyroot_binding()
-#ROOT.gInterpreter.Declare('#include "mysf.h"')
+#ROOT.gInterpreter.Declare('#include "functions.h"')
 #ROOT.gInterpreter.Load("mysf.so")
+
 
 useXROOTD = False
 
@@ -204,6 +205,8 @@ def getDATAlist(type, year, skimType):
         jsnName = "Cert_Collisions2023_366442_370790_Golden.json"
     elif(year == 2024):
         jsnName = "Cert_Collisions2024_378981_386951_Golden.json"
+    elif(year == 2025):
+        jsnName = "Cert_Collisions2025_391658_398860_Golden.json"
 
     if os.path.exists(os.path.join("jsns",jsnName)):
         loadJSON(os.path.join("jsns",jsnName))

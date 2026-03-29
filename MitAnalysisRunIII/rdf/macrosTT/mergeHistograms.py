@@ -5,10 +5,10 @@ from utilsCategory import plotCategory
 ROOT.PyConfig.DisableRootLogon = True
 
 if __name__ == "__main__":
-    dir = "1001"
+    dir = "1000"
     base = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/histo/fillhisto_sswwAnalysis"
     path = "fillhisto_sswwAnalysis"
-    year = 20231
+    year = 20220
     output = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/merge1"
     mkdir = output
     if not os.path.exists(mkdir):

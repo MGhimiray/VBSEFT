@@ -6,12 +6,17 @@
 	{
 	    "name": "FAKE_MU",
 	    "version": 12,
-	    "definition": "(abs(Muon_dxy) < 0.05 && abs(Muon_dz) < 0.10 && abs(Muon_eta) < 2.4 && Muon_pt > 10 && Muon_looseId == true && Muon_mediumId == true && Muon_pfIsoId >= 1 && Muon_jetRelIso < 0.5)"
+	    "definition": "(abs(Muon_dxy) < 0.05 && abs(Muon_dz) < 0.10 && abs(Muon_eta) < 2.4 && Muon_pt > 10 && Muon_looseId == true && Muon_mediumPromptId == true && Muon_pfIsoId >= 1 && Muon_jetRelIso < 0.5)"
+	},
+	{
+	    "name": "TIGHT_FAKE_MU",
+	    "version": 12,
+	    "definition": "(abs(fake_Muon_dxy) < 0.05 && abs(fake_Muon_dz) < 0.10 && abs(fake_Muon_eta) < 2.4 && fake_Muon_pt > 10 && fake_Muon_looseId == true && fake_Muon_mediumPromptId == true && fake_Muon_pfIsoId >= 1 && fake_Muon_jetRelIso < 0.5)"
 	},
 	{
 	    "name": "TIGHT_MU0",
 	    "version": 12,
-	    "definition": "(fake_Muon_mediumId == true && fake_Muon_pfIsoId >= 4)"
+	    "definition": "(fake_Muon_mediumPromptId == true && fake_Muon_pfIsoId >= 2)"
 	},
 	{
 	    "name": "TIGHT_MU1",
@@ -63,6 +68,11 @@
 	    "name": "FAKE_EL",
 	    "version": 12,
 	    "definition": "(abs(Electron_dxy) < 0.05 && abs(Electron_dz) < 0.10 && abs(Electron_eta) < 2.5 && Electron_pt > 10 && Electron_cutBased >= 2 && Electron_jetRelIso < 0.5)"
+	},
+	{
+	    "name": "TIGHT_FAKE_EL",
+	    "version": 12,
+	    "definition": "(abs(fake_Electron_dxy) < 0.05 && abs(fake_Electron_dz) < 0.10 && abs(fake_Electron_eta) < 2.5 && fake_Electron_pt > 10 && fake_Electron_cutBased >= 2 && fake_Electron_jetRelIso < 0.5)"
 	},
 	{
 	    "name": "TIGHT_EL0",
@@ -118,12 +128,17 @@
 	{
 	    "name": "FAKE_MU",
 	    "version": 15,
-	    "definition": "(abs(Muon_dxy) < 0.05 && abs(Muon_dz) < 0.10 && abs(Muon_eta) < 2.4 && Muon_pt > 10 && Muon_looseId == true && Muon_mediumId == true && Muon_pfIsoId >= 1 && Muon_jetRelIso < 0.5)"
+	    "definition": "(abs(Muon_dxy) < 0.05 && abs(Muon_dz) < 0.10 && abs(Muon_eta) < 2.4 && Muon_pt > 10 && Muon_looseId == true && Muon_mediumPromptId == true && Muon_pfIsoId >= 1 && Muon_jetRelIso < 0.5)"
+	},
+	{
+	    "name": "TIGHT_FAKE_MU",
+	    "version": 15,
+	    "definition": "(abs(fake_Muon_dxy) < 0.05 && abs(fake_Muon_dz) < 0.10 && abs(fake_Muon_eta) < 2.4 && fake_Muon_pt > 10 && fake_Muon_looseId == true && fake_Muon_mediumPromptId == true && fake_Muon_pfIsoId >= 1 && fake_Muon_jetRelIso < 0.5)"
 	},
 	{
 	    "name": "TIGHT_MU0",
 	    "version": 15,
-	    "definition": "(fake_Muon_mediumId == true && fake_Muon_pfIsoId >= 4)"
+	    "definition": "(fake_Muon_mediumPromptId == true && fake_Muon_pfIsoId >= 2)"
 	},
 	{
 	    "name": "TIGHT_MU1",
@@ -175,6 +190,11 @@
 	    "name": "FAKE_EL",
 	    "version": 15,
 	    "definition": "(abs(Electron_dxy) < 0.05 && abs(Electron_dz) < 0.10 && abs(Electron_eta) < 2.5 && Electron_pt > 10 && Electron_cutBased >= 2 && Electron_jetRelIso < 0.5)"
+	},
+	{
+	    "name": "TIGHT_FAKE_EL",
+	    "version": 15,
+	    "definition": "(abs(fake_Electron_dxy) < 0.05 && abs(fake_Electron_dz) < 0.10 && abs(fake_Electron_eta) < 2.5 && fake_Electron_pt > 10 && fake_Electron_cutBased >= 2 && fake_Electron_jetRelIso < 0.5)"
 	},
 	{
 	    "name": "TIGHT_EL0",
@@ -272,6 +292,16 @@
 "met_filters": [
 	{
 	    "name": "All",
+	    "year": 2016,
+	    "definition": "(Flag_goodVertices&&Flag_globalSuperTightHalo2016Filter&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter&&Flag_hfNoisyHitsFilter&&Flag_eeBadScFilter&&Flag_ecalBadCalibFilter)"
+	},
+	{
+	    "name": "All",
+	    "year": 2017,
+	    "definition": "(Flag_goodVertices&&Flag_globalSuperTightHalo2016Filter&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter&&Flag_hfNoisyHitsFilter&&Flag_eeBadScFilter&&Flag_ecalBadCalibFilter)"
+	},
+	{
+	    "name": "All",
 	    "year": 2018,
 	    "definition": "(Flag_goodVertices&&Flag_globalSuperTightHalo2016Filter&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter&&Flag_hfNoisyHitsFilter&&Flag_eeBadScFilter&&Flag_ecalBadCalibFilter)"
 	},
@@ -289,6 +319,12 @@
 	{
 	    "name": "All",
 	    "year": 2024,
+	    "definition": "(Flag_goodVertices&&Flag_globalSuperTightHalo2016Filter&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter&&Flag_hfNoisyHitsFilter&&Flag_eeBadScFilter&&Flag_ecalBadCalibFilter)"
+	}
+,
+	{
+	    "name": "All",
+	    "year": 2025,
 	    "definition": "(Flag_goodVertices&&Flag_globalSuperTightHalo2016Filter&&Flag_EcalDeadCellTriggerPrimitiveFilter&&Flag_BadPFMuonFilter&&Flag_BadPFMuonDzFilter&&Flag_hfNoisyHitsFilter&&Flag_eeBadScFilter&&Flag_ecalBadCalibFilter)"
 	}
 ],
@@ -620,6 +656,68 @@
 	{
 	    "name": "TRIGGERPHOFAKE",
 	    "year": 2024,
+	    "definition": "(HLT_Photon20||HLT_Photon33||HLT_Photon50||HLT_Photon75||HLT_Photon90||HLT_Photon120||HLT_Photon150||HLT_Photon175||HLT_Photon200)"
+	},
+
+
+	{
+	    "name": "TRIGGERMUEG",
+	    "year": 2025,
+	    "definition": "(HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)"
+	},
+	{
+	    "name": "TRIGGERDMU",
+	    "year": 2025,
+	    "definition": "(HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8)"
+	},
+	{
+	    "name": "TRIGGERSMU",
+	    "year": 2025,
+	    "definition": "(HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50)"
+	},
+	{
+	    "name": "TRIGGERDEL",
+	    "year": 2025,
+	    "definition": "(HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle25_CaloIdL_MW||HLT_DoublePhoton70)"
+	},
+	{
+	    "name": "TRIGGERSEL",
+	    "year": 2025,
+	    "definition": "(HLT_Ele30_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Ele35_WPTight_Gsf||HLT_Ele115_CaloIdVT_GsfTrkIdT)"
+	},
+	{
+	    "name": "TRIGGERFAKEMU",
+	    "year": 2025,
+	    "definition": "(HLT_Mu8_TrkIsoVVL||HLT_Mu17_TrkIsoVVL||HLT_Mu19_TrkIsoVVL)"
+	},
+	{
+	    "name": "TRIGGERFAKEEL",
+	    "year": 2025,
+	    "definition": "(HLT_Ele8_CaloIdL_TrackIdL_IsoVL_PFJet30||HLT_Ele12_CaloIdL_TrackIdL_IsoVL_PFJet30||HLT_Ele23_CaloIdL_TrackIdL_IsoVL_PFJet30)"
+	},
+	{
+	    "name": "TRIGGERMET",
+	    "year": 2025,
+	    "definition": "(HLT_CaloMET90_NotCleaned||HLT_CaloMET350_NotCleaned||HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_PFHT60||HLT_PFMETNoMu120_PFMHTNoMu120_IDTight||HLT_PFMETNoMu130_PFMHTNoMu130_IDTight||HLT_PFMETNoMu140_PFMHTNoMu140_IDTight||HLT_PFMETNoMu110_PFMHTNoMu110_IDTight_FilterHF||HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_FilterHF||HLT_PFMETNoMu130_PFMHTNoMu130_IDTight_FilterHF||HLT_PFMETNoMu140_PFMHTNoMu140_IDTight_FilterHF)"
+	},
+	{
+	    "name": "TRIGGERVBF",
+	    "year": 2025,
+	    "definition": "(HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3)"
+	},
+	{
+	    "name": "TRIGGERKKG",
+	    "year": 2025,
+	    "definition": "(HLT_Photon35_TwoProngs35)"
+	},
+	{
+	    "name": "TRIGGERPHOINC",
+	    "year": 2025,
+	    "definition": "(HLT_Photon20||HLT_Photon33||HLT_Photon50||HLT_Photon75||HLT_Photon90||HLT_Photon120||HLT_Photon150||HLT_Photon175||HLT_Photon200||HLT_Photon50_R9Id90_HE10_IsoM||HLT_Photon75_R9Id90_HE10_IsoM||HLT_Photon90_R9Id90_HE10_IsoM||HLT_Photon120_R9Id90_HE10_IsoM||HLT_Photon165_R9Id90_HE10_IsoM)"
+	},
+	{
+	    "name": "TRIGGERPHOFAKE",
+	    "year": 2025,
 	    "definition": "(HLT_Photon20||HLT_Photon33||HLT_Photon50||HLT_Photon75||HLT_Photon90||HLT_Photon120||HLT_Photon150||HLT_Photon175||HLT_Photon200)"
 	}
     ]
