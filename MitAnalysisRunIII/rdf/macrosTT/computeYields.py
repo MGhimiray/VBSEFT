@@ -5,9 +5,9 @@ sys.path.append('/mnt/home/mghimiray/VBSStudies/VBSStudies03/MitAnalysisRunIII/r
 from utilsCategory import plotCategory
 
 if __name__ == "__main__":
-    path = "fillhisto_sswwAnalysis1001"
-    year = 2023
-    output = "/mnt/home/mghimiray/VBSStudies/Outputs_VBS/OriginalTT/1001/merge3/"
+    path = "fillhisto_sswwAnalysis"
+    year = 20250
+    output = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/merge1/"
     showUnc = 0
 
     valid = ['path=', "year=", 'output=', "unc=", 'help']

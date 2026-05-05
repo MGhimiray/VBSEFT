@@ -8,6 +8,7 @@
 #SBATCH --error=logs/%x_%j.err
 
 # activating the vev 
+# source ~/.bashrc
 eval "$(/mnt/home/mghimiray/miniforge3/bin/conda shell.bash hook)"
 conda activate myenv
 

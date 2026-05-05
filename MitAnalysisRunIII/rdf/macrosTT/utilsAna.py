@@ -11,18 +11,20 @@ correctionlib.register_pyroot_binding()
 useXROOTD = False
 
 def getLumi(year):
-    lumi = [36.1, 41.5, 60.0, 8.1, 26.7, 18.1, 9.7, 109.6, 105.0]
+    #lumi = [19.5, 16.8, 41.5, 60.0, 8.1, 26.7, 18.1, 9.7, 109.6, 107.5]
+    lumi = [19.5, 16.8, 41.5, 101.5, 8.1, 26.7, 18.1, 9.7, 109.6, 107.5]
 
     lumiBit = -999
-    if(year == 2016): lumiBit = 0
-    elif(year == 2017): lumiBit = 1
-    elif(year == 2018): lumiBit = 2
-    elif(year == 20220): lumiBit = 3
-    elif(year == 20221): lumiBit = 4
-    elif(year == 20230): lumiBit = 5
-    elif(year == 20231): lumiBit = 6
-    elif(year == 20240): lumiBit = 7
-    elif(year == 20250): lumiBit = 8
+    if  (year == 20160): lumiBit = 0
+    elif(year == 20161): lumiBit = 1
+    elif(year == 20170): lumiBit = 2
+    elif(year == 20180): lumiBit = 3
+    elif(year == 20220): lumiBit = 4
+    elif(year == 20221): lumiBit = 5
+    elif(year == 20230): lumiBit = 6
+    elif(year == 20231): lumiBit = 7
+    elif(year == 20240): lumiBit = 8
+    elif(year == 20250): lumiBit = 9
 
     print("lumi({0}/{1}) = {2}".format(year,lumiBit,lumi[lumiBit]))
 
@@ -64,11 +66,12 @@ def getTriggerFromJson(overall, type, year):
     for trigger in overall:
         if(trigger['name'] == type and trigger['year'] == year): return trigger['definition']
 
+
 def getLeptomSelFromJson(overall, type, year, debug = 0):
 
     if(year > 10000): year = year // 10
     version = 12
-    if(year >= 2024): version = 15
+    if(year >= 2024 or year <= 2021): version = 15
 
     for leptonSel in overall:
         if(leptonSel['name'] == type and leptonSel['version'] == version):
@@ -1272,7 +1275,7 @@ def SwitchSample(argument, skimType):
        594: (dirT2+"2024/"+skimType+"/VBS-SSWW-M0-Quadratic_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", 0.007333*1000,plotCategory("kPlotEFTQuad")),
        595: (dirT3+"Sherpa_Sample/2024", 39.8961,plotCategory("kPlotEWKSSWW")),
 
-## 2026#####
+## 2025#####
 
        600: (dirT2+"2024/"+skimType+"/DYto2E_Bin-MLL-10to50_TuneCP5_13p6TeV_powheg-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM",19982.5*1000/3.,plotCategory("kPlotDY")),
        601: (dirT2+"2024/"+skimType+"/DYto2E-2Jets_Bin-MLL-50_TuneCP5_13p6TeV_amcatnloFXFX-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v4+NANOAODSIM",6345.99*1000/3.,plotCategory("kPlotDY")),
