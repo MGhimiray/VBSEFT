@@ -138,7 +138,7 @@ def selectionLL(df,year,PDType,isData,count):
 
     return dftag
 
-def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplicas,genEventSumLHEScaleRenorm,genEventSumPSRenorm,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3):
+def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplicas,genEventSumLHEScaleRenorm,genEventSumPSRenorm,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff):
 
     print("starting {0} / {1} / {2} / {3} / {4} / {5} / {6}".format(count,category,weight,year,PDType,isData,whichJob))
 
@@ -350,12 +350,20 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
     for x in range(nCat):
         dfwwcat.append(dfbase.Filter("theCat=={0}".format(x), "correct category ({0})".format(x)))
 
-        if((x == plotCategory("kPlotEWKSSWW")) and isData == "false"):
-            dfwwcat[x] = (dfwwcat[x].Define("theGenCat", "compute_vbs_gen_category({0},ngood_GenJets,good_GenJet_pt,good_GenJet_eta,good_GenJet_phi,good_GenJet_mass,ngood_GenDressedLeptons,good_GenDressedLepton_pdgId,good_GenDressedLepton_hasTauAnc,good_GenDressedLepton_pt,good_GenDressedLepton_eta,good_GenDressedLepton_phi,good_GenDressedLepton_mass,0)".format(genVBSSel))
+        if((x == plotCategory("kPlotEFTInt") or x == plotCategory("kPlotEFTQuad")) and isData == "false"):
+            dfwwcat[x] = (dfwwcat[x].Define("invariant_mass", "Get_mww(good_GenDressedLepton_pt, good_GenDressedLepton_eta, good_GenDressedLepton_phi, good_GenDressedLepton_mass, good_GenDressedLepton_pz, GenMET_pt, GenMET_phi)")
+                          .Filter ("invariant_mass < {0}".format(cutOff), "mww < {0} GeV".format(cutOff))
+                          .Define("theGenCat", "{0}".format(0))
+                  )
+        elif(isData == "true"):
+            dfwwcat[x] = (dfwwcat[x].Define("theGenCat", "{0}".format(0))
+                           .Define("invariant_mass", "{0}".format(0))
                                     )
         else:
             dfwwcat[x] = (dfwwcat[x].Define("theGenCat", "{0}".format(0))
+                           .Define("invariant_mass", "Get_mww(good_GenDressedLepton_pt, good_GenDressedLepton_eta, good_GenDressedLepton_phi, good_GenDressedLepton_mass, good_GenDressedLepton_pz, GenMET_pt, GenMET_phi)")
                                     )
+
         dfwwvbscatMuonMomUp    .append(dfwwcat[x])
         dfwwvbscatElectronMomUp.append(dfwwcat[x])
         dfwwvbscatJes00Up      .append(dfwwcat[x])
@@ -582,9 +590,9 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
 
         # Set output directory
         if (isData == "true"):
-            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/{0}/ntuple/"
+            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/{0}/{1}/ntuple/".format(dirT2, cutOff)
         elif (isData == "false"):
-            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{0}/ntuple/".format(dirT2)
+            output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{0}/{1}/ntuple/".format(dirT2, cutOff)
 
         os.makedirs(output_dir, exist_ok=True)
         # Debugging print
@@ -593,7 +601,7 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
 
         print(f"doNtuples={doNtuples}, x={x}, theCat={theCat}")  # for checking the output files
         if(doNtuples == True and x == theCat):            
-            outputFile = f"{output_dir}/ntupleSSWWAna_sample{count}_year{year}_job{whichJob}.root"
+            outputFile = f"{output_dir}/1200/ntupleSSWWAna_sample{count}_year{year}_job{whichJob}.root"
             dfwwvbscat[x].Snapshot("events", outputFile, branchList)
 
 
@@ -608,20 +616,21 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histo[107][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(107,x), "histo_{0}_{1}".format(107,x),12,500,3500), "vbs_mjj","weight7")
         histo[108][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(108,x), "histo_{0}_{1}".format(108,x),12,500,3500), "vbs_mjj","weightWSUnc0")
         histo[109][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(109,x), "histo_{0}_{1}".format(109,x),12,500,3500), "vbs_mjj","weightWSUnc1")
-        histo[112][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(112,x), "histo_{0}_{1}".format(112,x),20,0,3000), "MT","weight")
-        histo[113][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(113,x), "histo_{0}_{1}".format(113,x),20,0,3000), "M01","weight")
-        histo[114][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(114,x), "histo_{0}_{1}".format(114,x),20,0,3000), "M1T","weight")
-        histo[115][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(115,x), "histo_{0}_{1}".format(115,x),25,4.5,8.0), "logMT","weight")
-        histo[116][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(116,x), "histo_{0}_{1}".format(116,x),25,4.5,8.0), "logM01","weight")
-        histo[117][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(117,x), "histo_{0}_{1}".format(117,x),25,4.5,8.0), "logM1T","weight")
+        histo[112][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(112,x), "histo_{0}_{1}".format(112,x),20,0,1500), "MT","weight")
+        histo[113][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(113,x), "histo_{0}_{1}".format(113,x),20,0,1500), "M01","weight")
+        histo[114][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(114,x), "histo_{0}_{1}".format(114,x),20,0,1500), "M1T","weight")
+        histo[115][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(115,x), "histo_{0}_{1}".format(115,x),20,4.5,8.0), "logMT","weight")
+        histo[116][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(116,x), "histo_{0}_{1}".format(116,x),20,4.5,8.0), "logM01","weight")
+        histo[117][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(117,x), "histo_{0}_{1}".format(117,x),20,4.5,8.0), "logM1T","weight")
         histo[118][x] = dfwwvbscat[x].Histo1D(("histo_{0}_{1}".format(118,x), "histo_{0}_{1}".format(118,x),9, -3., 3), "Rpt","weight")
-        histo[119][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(119,x), "histo_{0}_{1}".format(119,x),20,0,3000), "MT","weight")
-        histo[120][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(120,x), "histo_{0}_{1}".format(120,x),20,0,3000), "M01","weight")
-        histo[121][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(121,x), "histo_{0}_{1}".format(121,x),20,0,3000), "M1T","weight")
-        histo[122][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(122,x), "histo_{0}_{1}".format(122,x),25,4.5,8.0), "logMT","weight")
-        histo[123][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(123,x), "histo_{0}_{1}".format(123,x),25,4.5,8.0), "logM01","weight")
-        histo[124][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(124,x), "histo_{0}_{1}".format(124,x),25,4.5,8.0), "logM1T","weight")
+        histo[119][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(119,x), "histo_{0}_{1}".format(119,x),20,0,1500), "MT","weight")
+        histo[120][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(120,x), "histo_{0}_{1}".format(120,x),20,0,1500), "M01","weight")
+        histo[121][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(121,x), "histo_{0}_{1}".format(121,x),20,0,1500), "M1T","weight")
+        histo[122][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(122,x), "histo_{0}_{1}".format(122,x),20,4.5,8.0), "logMT","weight")
+        histo[123][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(123,x), "histo_{0}_{1}".format(123,x),20,4.5,8.0), "logM01","weight")
+        histo[124][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(124,x), "histo_{0}_{1}".format(124,x),20,4.5,8.0), "logM1T","weight")
         histo[125][x] = dfwwbvbscat[x].Histo1D(("histo_{0}_{1}".format(125,x), "histo_{0}_{1}".format(125,x),9, -3., 3), "Rpt","weight")
+        histo[126][x] = dfwwvbscat[x] .Histo1D(("histo_{0}_{1}".format(126,x), "histo_{0}_{1}".format(126,x),20, 0, 2000), "invariant_mass","weight")
 
 
         BinXF1 = 10
@@ -959,16 +968,16 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 histo2D[j][x].SetBinContent(histo2D[j][x].GetNbinsX()+1,i+1,0.0)
                 histo2D[j][x].SetBinError  (histo2D[j][x].GetNbinsX()+1,i+1,0.0)
                 
-            if(x == plotCategory("kPlotEWKSSWW")):
-                histoMVA[j][plotCategory("kPlotEWKSSWW")].SetBinError(1,0.0)
+#            if(x == plotCategory("kPlotEWKSSWW")):
+#                histoMVA[j][plotCategory("kPlotEWKSSWW")].SetBinError(1,0.0)
 #                histoMVA[j][plotCategory("kPlotSignal0")].SetBinError(1,0.0)
 #                histoMVA[j][plotCategory("kPlotSignal1")].SetBinError(1,0.0)
 #                histoMVA[j][plotCategory("kPlotSignal2")].SetBinError(1,0.0)
 #                histoMVA[j][plotCategory("kPlotSignal3")].SetBinError(1,0.0)
-                for i in range(histoMVA[j][x].GetNbinsX()):
-                    histoMVA[j][plotCategory("kPlotEWKSSWW")].SetBinContent(i+1,        histoMVA[j][plotCategory("kPlotEWKSSWW")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,1))
-                    histoMVA[j][plotCategory("kPlotEWKSSWW")].SetBinError  (i+1,pow(pow(histoMVA[j][plotCategory("kPlotEWKSSWW")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
-
+#                for i in range(histoMVA[j][x].GetNbinsX()):
+#                    histoMVA[j][plotCategory("kPlotEWKSSWW")].SetBinContent(i+1,        histoMVA[j][plotCategory("kPlotEWKSSWW")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,1))
+#                    histoMVA[j][plotCategory("kPlotEWKSSWW")].SetBinError  (i+1,pow(pow(histoMVA[j][plotCategory("kPlotEWKSSWW")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
+#
 #                    histoMVA[j][plotCategory("kPlotSignal0")].SetBinContent(i+1,        histoMVA[j][plotCategory("kPlotSignal0")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,2))
 #                    histoMVA[j][plotCategory("kPlotSignal0")].SetBinError  (i+1,pow(pow(histoMVA[j][plotCategory("kPlotSignal0")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,2),2),0.5))
 #
@@ -981,15 +990,15 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
 #                    histoMVA[j][plotCategory("kPlotSignal3")].SetBinContent(i+1,        histoMVA[j][plotCategory("kPlotSignal3")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,5))
 #                    histoMVA[j][plotCategory("kPlotSignal3")].SetBinError  (i+1,pow(pow(histoMVA[j][plotCategory("kPlotSignal3")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,5),2),0.5))
 #
-            else:
-                for i in range(histoMVA[j][x].GetNbinsX()):
-                    histoMVA[j][x].SetBinContent(i+1,        histoMVA[j][x].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,1))
-                    histoMVA[j][x].SetBinError  (i+1,pow(pow(histoMVA[j][x].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
+#            else:
+            for i in range(histoMVA[j][x].GetNbinsX()):
+                histoMVA[j][x].SetBinContent(i+1,        histoMVA[j][x].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,1))
+                histoMVA[j][x].SetBinError  (i+1,pow(pow(histoMVA[j][x].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
 
     if (isData == "true"):
-        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/{0}/histo/fillhisto_sswwAnalysis/".format(dirT2)
+        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/{0}/{1}/histo/fillhisto_sswwAnalysis/".format(dirT2, cutOff)
     elif (isData == "false"):
-        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{0}/histo/fillhisto_sswwAnalysis/".format(dirT2) # Defining output directory for histograms
+        output_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{0}/{1}/histo/fillhisto_sswwAnalysis/".format(dirT2, cutOff) # Defining output directory for histograms
 
     os.makedirs(output_dir2, exist_ok=True)
 
@@ -1009,16 +1018,12 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histoNonPrompt[i].Write()
     myfile.Close()
 
-def readMCSample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3):
+# MC files
+def readMCSample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff):
 
     files = getMClist(sampleNOW, skimType)
-    sampleInfo = SwitchSample(sampleNOW, skimType) #vscode
-    samplePath = sampleInfo[0] #vscode
-    sampleXsec = sampleInfo[1] #vscode
-    samplePlotCategory = sampleInfo[2] #vscode
-    totalFiles = len(files) #vscode
-    print("Total files: {0}".format(totalFiles))
-
+    print("Total files: {0}".format(len(files)))
+# To check how many different MC weights are in a file, for LHEPDF, LHEScale, Partonshower
     genEventSumWeight = 0
     genEventSumNoWeight = 0
     nTheoryReplicas = [103, 9, 4]
@@ -1061,12 +1066,13 @@ def readMCSample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights
     runGetEntries = dfRuns.Count().GetValue()
 
     print("Number of Theory replicas: {0} / {1} / {2}".format(nTheoryReplicas[0],nTheoryReplicas[1],nTheoryReplicas[2]))
-
+# Is 4 the nominal value? I checked and the 4th value is 1
+# Why only specific samples?
     genEventSumLHEScaleRenorm = [1, 1, 1, 1, 1, 1]
     genEventSumPSRenorm = [1, 1, 1, 1]
-    if(samplePlotCategory == plotCategory("kPlotEWKSSWW") or
-       samplePlotCategory == plotCategory("kPlotWZ") or
-       samplePlotCategory == plotCategory("kPlotEWKWZ")):
+    if(SwitchSample(sampleNOW,skimType)[2] == plotCategory("kPlotEWKSSWW") or
+       SwitchSample(sampleNOW,skimType)[2] == plotCategory("kPlotWZ") or
+       SwitchSample(sampleNOW,skimType)[2] == plotCategory("kPlotEWKWZ")):
         genEventSumLHEScaleRenorm[0] = genEventSumLHEScaleWeight[0] / genEventSumLHEScaleWeight[4]
         genEventSumLHEScaleRenorm[1] = genEventSumLHEScaleWeight[1] / genEventSumLHEScaleWeight[4]
         genEventSumLHEScaleRenorm[2] = genEventSumLHEScaleWeight[3] / genEventSumLHEScaleWeight[4]
@@ -1078,9 +1084,11 @@ def readMCSample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights
     print("genEventSumLHEScaleRenorm: ",genEventSumLHEScaleRenorm)
     print("genEventSumPSRenorm: ",genEventSumPSRenorm)
 
-    weight = (sampleXsec / genEventSumWeight)*getLumi(year)
-    weightApprox = (sampleXsec / genEventSumNoWeight)*getLumi(year)
+# Luminosity normalization
+    weight = (SwitchSample(sampleNOW, skimType)[1] / genEventSumWeight)*getLumi(year)
+    weightApprox = (SwitchSample(sampleNOW, skimType)[1] / genEventSumNoWeight)*getLumi(year)
 
+# Grouping the files for parallel processing
     if(whichJob != -1):
         groupedFile = groupFiles(files, group)
         files = groupedFile[whichJob]
@@ -1089,39 +1097,17 @@ def readMCSample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights
             return 0
         print("Used files: {0}".format(len(files)))
 
-
     df = ROOT.RDataFrame("Events", files)
     nevents = df.Count().GetValue()
 
     print("genEventSum({0}): {1} / Events(total/ntuple): {2} / {3}".format(runGetEntries,genEventSumWeight,genEventSumNoWeight,nevents))
-    print("WeightExact/Approx %f / %f / Cross section: %f" %(weight, weightApprox, sampleXsec))
+    print("WeightExact/Approx %f / %f / Cross section: %f" %(weight, weightApprox, SwitchSample(sampleNOW, skimType)[1]))
 
-    if(samplePlotCategory == plotCategory("kPlotEWKSSWW")): #vscode
-        print("### DEBUG_EWKSSWW_START ###") #vscode
-        print("DEBUG_EWKSSWW sampleNOW      = {0}".format(sampleNOW)) #vscode
-        print("DEBUG_EWKSSWW year           = {0}".format(year)) #vscode
-        print("DEBUG_EWKSSWW skimType       = {0}".format(skimType)) #vscode
-        print("DEBUG_EWKSSWW samplePath     = {0}".format(samplePath)) #vscode
-        print("DEBUG_EWKSSWW nFilesTotal    = {0}".format(totalFiles)) #vscode
-        print("DEBUG_EWKSSWW nFilesThisJob  = {0}".format(len(files))) #vscode
-        print("DEBUG_EWKSSWW genEventSumW   = {0}".format(genEventSumWeight)) #vscode
-        print("DEBUG_EWKSSWW genEventSumNW  = {0}".format(genEventSumNoWeight)) #vscode
-        print("DEBUG_EWKSSWW neventsTree    = {0}".format(nevents)) #vscode
-        print("DEBUG_EWKSSWW lumi           = {0}".format(getLumi(year))) #vscode
-        print("DEBUG_EWKSSWW xsec_pb        = {0}".format(sampleXsec)) #vscode
-        print("DEBUG_EWKSSWW weightExact    = {0}".format(weight)) #vscode
-        print("DEBUG_EWKSSWW weightApprox   = {0}".format(weightApprox)) #vscode
-        if(genEventSumWeight != 0): #vscode
-            print("DEBUG_EWKSSWW eventsPerSumW  = {0}".format(nevents/genEventSumWeight)) #vscode
-        if(genEventSumNoWeight != 0): #vscode
-            print("DEBUG_EWKSSWW eventsPerSumNW = {0}".format(nevents/genEventSumNoWeight)) #vscode
-        print("### DEBUG_EWKSSWW_END ###") #vscode
+    PDType = os.path.basename(SwitchSample(sampleNOW, skimType)[0]).split('+')[0]
 
-    PDType = os.path.basename(samplePath).split('+')[0]
+    analysis(df,sampleNOW,SwitchSample(sampleNOW,skimType)[2],weight,year,PDType,"false",whichJob,nTheoryReplicas,genEventSumLHEScaleRenorm,genEventSumPSRenorm,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff)
 
-    analysis(df,sampleNOW,samplePlotCategory,weight,year,PDType,"false",whichJob,nTheoryReplicas,genEventSumLHEScaleRenorm,genEventSumPSRenorm,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3)
-
-def readDASample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3):
+def readDASample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff):
 
     PDType = "0"
     if  (sampleNOW >= 1000 and sampleNOW <= 1009): PDType = "SingleMuon"
@@ -1152,7 +1138,7 @@ def readDASample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights
     nevents = df.Count().GetValue()
     print("%s entries in the dataset" %nevents)
 
-    analysis(df,sampleNOW,sampleNOW,weight,year,PDType,"true",whichJob,0,genEventSumLHEScaleRenorm,genEventSumPSRenorm,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3)
+    analysis(df,sampleNOW,sampleNOW,weight,year,PDType,"true",whichJob,0,genEventSumLHEScaleRenorm,genEventSumPSRenorm,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff)
 
 if __name__ == "__main__":
 
@@ -1162,11 +1148,13 @@ if __name__ == "__main__":
     year = 2022
     process = -1
     whichJob = -1
+    cutOff=1500
 
-    valid = ['year=', "process=", 'whichJob=', 'help']
+    valid = ['year=', "process=", 'whichJob=', 'cutOff=', 'help']
     usage  =  "Usage: ana.py --year=<{0}>\n".format(year)
     usage +=  "              --process=<{0}>\n".format(process)
-    usage +=  "              --whichJob=<{0}>".format(whichJob)
+    usage +=  "              --whichJob=<{0}>\n".format(whichJob)
+    usage +=  "              --cutOff=<{0}>".format(cutOff)
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", valid)
     except getopt.GetoptError as ex:
@@ -1184,7 +1172,8 @@ if __name__ == "__main__":
             process = int(arg)
         if opt == "--whichJob":
             whichJob = int(arg)
-
+        if opt == "--cutOff":
+            cutOff = int(arg)
     ewkCorrWeights = []
     ewkCorrPath = "data/VV_NLO_LO_CMS_mjj.root"
     fewkCorrFile = ROOT.TFile(ewkCorrPath)
@@ -1300,9 +1289,9 @@ if __name__ == "__main__":
     fBTVEffPathFile.Close()
 
     try:
-        if(process >= 0 and process < 1000):
-            readMCSample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3)
+        if((process >= 0 and process < 1000) or (process >= 1990)):
+            readMCSample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff)
         elif(process >= 1000):
-            readDASample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3)
+            readDASample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff)
     except Exception as e:
         print("FAILED {0}".format(e))

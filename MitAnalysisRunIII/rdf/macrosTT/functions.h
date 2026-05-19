@@ -2615,6 +2615,8 @@ int print_info(const UInt_t run, const UInt_t lumi, const ULong64_t event){
  return py;
  }
 
+
+
 float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const Vec_f& mu_mass, const Vec_f& mu_pz,
                      const Vec_f& el_pt, const Vec_f& el_eta, const Vec_f& el_phi, const Vec_f& el_mass, const Vec_f& el_pz,
                       const float metpT,  const float metphi, const float mll,  const float ptll, unsigned int var){
@@ -2685,6 +2687,38 @@ float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const
 
     return theVar;
   }
+
+
+float Get_mww(const Vec_f& lepton_pt,
+              const Vec_f& lepton_eta,
+              const Vec_f& lepton_phi,
+              const Vec_f& lepton_mass,
+              const Vec_f& lepton_pz,
+              const float metpT,
+              const float metphi) {
+  if (lepton_pt.size() != 2) return 0.0f;
+
+  float px1 = lepton_pt[0] * cos(lepton_phi[0]);
+  float py1 = lepton_pt[0] * sin(lepton_phi[0]);
+  float px2 = lepton_pt[1] * cos(lepton_phi[1]);
+  float py2 = lepton_pt[1] * sin(lepton_phi[1]);
+
+  float pztot = lepton_pz[0] + lepton_pz[1];
+
+  float E1 = sqrt(lepton_pt[0]*lepton_pt[0] +
+                  lepton_pz[0]*lepton_pz[0] +
+                  lepton_mass[0]*lepton_mass[0]);
+
+  float E2 = sqrt(lepton_pt[1]*lepton_pt[1] +
+                  lepton_pz[1]*lepton_pz[1] +
+                  lepton_mass[1]*lepton_mass[1]);
+
+  float MTfirst  = E1 + E2 + metpT;
+  float MTsecond = pztot;
+
+  float mww2 = MTfirst*MTfirst - MTsecond*MTsecond;
+  return sqrt(mww2);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////

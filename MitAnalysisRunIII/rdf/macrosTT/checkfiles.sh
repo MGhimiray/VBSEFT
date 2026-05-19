@@ -7,8 +7,9 @@ set -uo pipefail
 
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
+cutoff=1200
 
-outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/${whichana}/histo/fillhisto_sswwAnalysis"
+outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/${whichana}/${cutoff}/histo/fillhisto_sswwAnalysis"
 
 echo "== Check files =="
 echo " year     : $year"
@@ -35,7 +36,7 @@ case "$year" in
     ;;
   2024)
     tags=(20240)
-    common="500 525 527 501 526 528 504 505 508 511 512 514 515 516 517 521 522 537 538 553 554 555 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 586 587 588"
+    common="500 525 527 501 526 528 504 505 508 511 512 514 515 516 517 521 522 537 538 553 554 555 565 566 567 568 569 570 571 572 573 574 575 576 577 578 579 580 581 582 583 586 587 588 589 590 591 593 594"
     samples["20240"]="$common"
     ;;
   2025)

@@ -7,9 +7,10 @@ set -uo pipefail
 
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
+cutoff=1200
 
 # Verify the capitalization ("matrix_method" vs "Matrix_method") matches your FS.
-outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${whichana}/histo/fillhisto_sswwAnalysis"
+outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${whichana}/${cutoff}/histo/fillhisto_sswwAnalysis"
 
 echo "== Check files =="
 echo " year     : $year"
@@ -59,7 +60,7 @@ esac
 get_max_seen_job() {
   local tag="$1" sample="$2"
   shopt -s nullglob
-  local arr=( "$outdir"/fillhisto_sswwAnalysis1001_sample"${sample}"_year"${tag}"1_job*.root )
+  local arr=( "$outdir"/fillhisto_sswwAnalysis1001_sample"${sample}"_year"${tag}"_job*.root )
   shopt -u nullglob
   local max=-1 f
   for f in "${arr[@]}"; do
@@ -79,7 +80,7 @@ total_found=0
 for tag in "${tags[@]}"; do
   for sample in ${samples[$tag]}; do
     for job in $jobs_list; do
-      f="$outdir/fillhisto_sswwAnalysis1001_sample${sample}_year${tag}1_job${job}.root"
+      f="$outdir/fillhisto_sswwAnalysis1001_sample${sample}_year${tag}_job${job}.root"
       (( total_expected++ ))
       if [[ -s "$f" ]]; then
         (( total_found++ ))
