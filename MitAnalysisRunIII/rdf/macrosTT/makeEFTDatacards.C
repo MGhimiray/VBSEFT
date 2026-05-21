@@ -24,12 +24,72 @@
 // EFT/AAC helpers
 // -----------------------------------------------------------------------------
 // The input EFT INT and QUAD histograms are assumed to have been produced at
-// Wilson coefficient c0.  For AAC, the datacard must contain:
-//   sm              = SM
-//   sm_lin_quad_cM0  = SM + INT/c0 + QUAD/c0^2
-//   quad_cM0         = QUAD/c0^2
+// Wilson coefficient c0. For AAC, the datacard must contain, for one operator:
+//   sm                    = SM
+//   sm_lin_quad_<wc>       = SM + INT/c0 + QUAD/c0^2
+//   quad_<wc>              = QUAD/c0^2
 //
 // The pure interference histogram is never written as a datacard process.
+
+struct EFTConfig {
+  TString op;       // e.g. M0, T0
+  TString wc;       // e.g. cM0, cT0
+  int intIndex;     // histogram category for pure INT input
+  int quadIndex;    // histogram category for pure QUAD input
+};
+
+bool getEFTConfig(TString eftOp, EFTConfig &cfg) {
+  eftOp.ToUpper();
+
+  if(eftOp == "M0") {
+    cfg = {"M0", "cM0", kPlotEFTM0Int, kPlotEFTM0Quad};
+    return true;
+  }
+  else if(eftOp == "M1") {
+    cfg = {"M1", "cM1", kPlotEFTM1Int, kPlotEFTM1Quad};
+    return true;
+  }
+  else if(eftOp == "M7") {
+    cfg = {"M7", "cM7", kPlotEFTM7Int, kPlotEFTM7Quad};
+    return true;
+  }
+  else if(eftOp == "S0") {
+    cfg = {"S0", "cS0", kPlotEFTS0Int, kPlotEFTS0Quad};
+    return true;
+  }
+  else if(eftOp == "T0") {
+    cfg = {"T0", "cT0", kPlotEFTT0Int, kPlotEFTT0Quad};
+    return true;
+  }
+  else if(eftOp == "T1") {
+    cfg = {"T1", "cT1", kPlotEFTT1Int, kPlotEFTT1Quad};
+    return true;
+  }
+  else if(eftOp == "T2") {
+    cfg = {"T2", "cT2", kPlotEFTT2Int, kPlotEFTT2Quad};
+    return true;
+  }
+
+  return false;
+}
+
+bool isAnyEFTComponent(int ic) {
+  if(ic == kPlotEFTM0Int || ic == kPlotEFTM0Quad) return true;
+  if(ic == kPlotEFTM1Int || ic == kPlotEFTM1Quad) return true;
+  if(ic == kPlotEFTM7Int || ic == kPlotEFTM7Quad) return true;
+  if(ic == kPlotEFTS0Int || ic == kPlotEFTS0Quad) return true;
+  if(ic == kPlotEFTT0Int || ic == kPlotEFTT0Quad) return true;
+  if(ic == kPlotEFTT1Int || ic == kPlotEFTT1Quad) return true;
+  if(ic == kPlotEFTT2Int || ic == kPlotEFTT2Quad) return true;
+  return false;
+}
+
+bool skipInactiveEFTProcess(int ic, const EFTConfig &cfg) {
+  if(!isAnyEFTComponent(ic)) return false;
+  if(ic == cfg.intIndex) return false;
+  if(ic == cfg.quadIndex) return false;
+  return true;
+}
 
 TH1D* cloneWithDirectoryOff(TH1D* h, const TString& name) {
   assert(h);
@@ -57,63 +117,69 @@ TH1D* buildQuadratic(TH1D* hQUAD, const TString& name, double c0) {
   return out;
 }
 
-void convertEFTTemplatesToAAC(TH1D* histos[nPlotCategories], double c0) {
-  if(!histos[kPlotEWKSSWW] || !histos[kPlotEFTM0Int] || !histos[kPlotEFTM0Quad]) return;
+void convertEFTTemplatesToAAC(TH1D* histos[nPlotCategories], double c0,
+                              const EFTConfig &cfg) {
+  if(!histos[kPlotEWKSSWW] || !histos[cfg.intIndex] || !histos[cfg.quadIndex]) return;
 
   TH1D* hSM   = histos[kPlotEWKSSWW];
-  TH1D* hINT  = histos[kPlotEFTM0Int];
-  TH1D* hQUAD = histos[kPlotEFTM0Quad];
+  TH1D* hINT  = histos[cfg.intIndex];
+  TH1D* hQUAD = histos[cfg.quadIndex];
 
-  TH1D* hSMOut  = cloneWithDirectoryOff(hSM,   "histo_sm");
-  TH1D* hSLQOut = buildSMLinearQuadratic(hSM, hINT, hQUAD, "histo_sm_lin_quad_cM0", c0);
-  TH1D* hQOut   = buildQuadratic(hQUAD, "histo_quad_cM0", c0);
+  TString hSMName  = "histo_sm";
+  TString hSLQName = Form("histo_sm_lin_quad_%s", cfg.wc.Data());
+  TString hQName   = Form("histo_quad_%s", cfg.wc.Data());
 
-  histos[kPlotEWKSSWW]   = hSMOut;
-  histos[kPlotEFTM0Int]  = hSLQOut;
-  histos[kPlotEFTM0Quad] = hQOut;
+  TH1D* hSMOut  = cloneWithDirectoryOff(hSM, hSMName);
+  TH1D* hSLQOut = buildSMLinearQuadratic(hSM, hINT, hQUAD, hSLQName, c0);
+  TH1D* hQOut   = buildQuadratic(hQUAD, hQName, c0);
+
+  histos[kPlotEWKSSWW] = hSMOut;
+  histos[cfg.intIndex] = hSLQOut;
+  histos[cfg.quadIndex] = hQOut;
 }
 
-
-bool skipUnusedEFTProcess(int ic) {
-  // This macro is configured for one active EFT operator: cM0.
-  // Keep only the M0 INT/QUAD slots, converted to sm_lin_quad_cM0 and quad_cM0.
-  if(ic == kPlotEFTT0Int || ic == kPlotEFTT0Quad) return true;
-  if(ic == kPlotEFTT1Int || ic == kPlotEFTT1Quad) return true;
-  if(ic == kPlotEFTT2Int || ic == kPlotEFTT2Quad) return true;
-  if(ic == kPlotEFTS0Int || ic == kPlotEFTS0Quad) return true;
-  if(ic == kPlotEFTM1Int || ic == kPlotEFTM1Quad) return true;
-  if(ic == kPlotEFTM7Int || ic == kPlotEFTM7Quad) return true;
-  return false;
-}
-
-bool useProcess(int ic, TH1D* histo_Baseline[nPlotCategories]) {
+bool useProcess(int ic, TH1D* histo_Baseline[nPlotCategories], const EFTConfig &cfg) {
   if(ic == kPlotData) return false;
-  if(skipUnusedEFTProcess(ic)) return false;
+  if(skipInactiveEFTProcess(ic, cfg)) return false;
   if(!histo_Baseline[ic]) return false;
-  if(histo_Baseline[ic]->GetSumOfWeights() <= 0) return false;
+  if(histo_Baseline[ic]->Integral() == 0.0) return false;
   return true;
 }
 
-bool shouldWriteHistogram(int ic, TH1D* histo_Baseline[nPlotCategories]) {
+bool shouldWriteHistogram(int ic, TH1D* histo_Baseline[nPlotCategories], const EFTConfig &cfg) {
   if(ic == kPlotData) return histo_Baseline[ic] != nullptr;
-  return useProcess(ic, histo_Baseline);
+  return useProcess(ic, histo_Baseline, cfg);
 }
 
-
-void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/1200/merge1/", TString anaSel = "sswwAnalysis", int year = 20240){
+void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/1200/merge1/", TString anaSel = "sswwAnalysis", int year = 20240, TString eftOp = "M0", double nC0 = 10.0){
   if(fidAna < 0 || fidAna > 6) printf("Wrong fidAna(%d)\n",fidAna);
+
+  EFTConfig cfg;
+  if(!getEFTConfig(eftOp, cfg)) {
+    printf("Unknown EFT operator option: %s\n", eftOp.Data());
+    return;
+  }
+
+  const double c0 = nC0; // Wilson coefficient value used in the generated INT/QUAD samples.
+  if(c0 == 0.0) {
+    printf("nC0 cannot be zero.\n");
+    return;
+  }
 
   int isTypeFakeSyst = 2;
   plotBaseNames[kPlotNonPrompt] = "NonPrompt";
   if     (anaSel.Contains("wzAnalysis")) {plotBaseNames[kPlotNonPrompt] = "NonWZPrompt";}
   else if(anaSel.Contains("zzAnalysis")) {plotBaseNames[kPlotNonPrompt] = "NonZZPrompt"; isTypeFakeSyst = 0;}
-  // AAC process names for one-operator cM0 fit.
-  // kPlotEFTM0Int is re-used as the final AAC process sm_lin_quad_cM0.
-  plotBaseNames[kPlotEWKSSWW]   = "sm";
-  plotBaseNames[kPlotEFTM0Int]  = "sm_lin_quad_cM0";
-  plotBaseNames[kPlotEFTM0Quad] = "quad_cM0";
 
-  const double c0 = 10.0; // Wilson coefficient value used in the generated INT/QUAD samples.
+  // AAC process names for the selected one-operator fit.
+  // The selected INT slot is reused as sm_lin_quad_<wc>.
+  // The selected QUAD slot is reused as quad_<wc>.
+  plotBaseNames[kPlotEWKSSWW] = "sm";
+  plotBaseNames[cfg.intIndex]  = Form("sm_lin_quad_%s", cfg.wc.Data());
+  plotBaseNames[cfg.quadIndex] = Form("quad_%s", cfg.wc.Data());
+
+  printf("Running EFT datacard for operator %s -> Wilson coefficient %s with c0 = %.6g\n",
+         cfg.op.Data(), cfg.wc.Data(), c0);
 
   int theYear = 0;
   TString theTagYear = "NULL";
@@ -309,14 +375,21 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   // Convert nominal SM/INT/QUAD EFT inputs to the AAC basis.
   // After this point:
-  //   kPlotEWKSSWW   -> histo_sm
-  //   kPlotEFTM0Int  -> histo_sm_lin_quad_cM0
-  //   kPlotEFTM0Quad -> histo_quad_cM0
-  convertEFTTemplatesToAAC(histo_Baseline, c0);
+  //   kPlotEWKSSWW -> histo_sm
+  //   cfg.intIndex -> histo_sm_lin_quad_<wc>
+  //   cfg.quadIndex -> histo_quad_<wc>
+  convertEFTTemplatesToAAC(histo_Baseline, c0, cfg);
+
+  cout << "===== EFT AAC CHECK =====" << endl;
+  cout << "Operator        = " << cfg.wc << endl;
+  cout << "SM integral     = " << histo_Baseline[kPlotEWKSSWW]->Integral() << endl;
+  cout << "SLQ integral    = " << histo_Baseline[cfg.intIndex]->Integral() << endl;
+  cout << "QUAD integral   = " << histo_Baseline[cfg.quadIndex]->Integral() << endl;
+  cout << "=========================" << endl;
 
   // Initialize theory-shape uncertainty histograms using the final AAC process names.
   for(int ic=0; ic<nPlotCategories; ic++) {
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
 
     histo_QCDScaleUp[ic] =
       (TH1D*)histo_Baseline[ic]->Clone(
@@ -353,7 +426,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   }
   for(int j=0; j<nSystDataCardTotal; j++){
     for(int ic=0; ic<nPlotCategories; ic++) {
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(
         (ic == kPlotEWKSSWW) &&
          nameSyst[j].Contains("ewkCorr")) {
@@ -371,12 +444,12 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   }
   for(int j=0; j<101; j++){
     for(int ic=0; ic<nPlotCategories; ic++) {
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       histo_PDFUp[j][ic] = (TH1D*)histo_Baseline[ic]->Clone(Form("histo_%s_pdf%dUp", plotBaseNames[ic].Data(), j));
       histo_PDFUp[j][ic]->SetDirectory(0);
     }
     for(int ic=0; ic<nPlotCategories; ic++) {
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       histo_PDFDown[j][ic] = (TH1D*)histo_Baseline[ic]->Clone(Form("histo_%s_pdf%dDown", plotBaseNames[ic].Data(), j));
       histo_PDFDown[j][ic]->SetDirectory(0);
     }
@@ -390,12 +463,12 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
     delete inputFile;
 
     // Convert each systematic variation to the same AAC basis:
-    // sm, sm_lin_quad_cM0, quad_cM0.
-    convertEFTTemplatesToAAC(histo_Syst[j], c0);
+    // sm, sm_lin_quad_<wc>, quad_<wc>.
+    convertEFTTemplatesToAAC(histo_Syst[j], c0, cfg);
   }
 
   for(unsigned ic=0; ic<nPlotCategories; ic++) {
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     for(int nb=1; nb<=histo_Baseline[ic]->GetNbinsX(); nb++){
       histo_Baseline[ic]->SetBinContent(nb, TMath::Max((float)histo_Baseline[ic]->GetBinContent(nb),0.0f));
 
@@ -586,13 +659,13 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   // Begin renormalize
   for(unsigned ic=kPlotData; ic!=nPlotCategories; ic++) {
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(!(ic == kPlotEWKSSWW ||
          ic == kPlotWZ ||
          ic == kPlotEWKWZ ||
          ic == kPlotZZ||
-         ic == kPlotEFTM0Int||
-         ic == kPlotEFTM0Quad
+         ic == cfg.intIndex||
+         ic == cfg.quadIndex
         ))  continue;
      histo_QCDScaleUp  [ic]->Scale(histo_Baseline[ic]->GetSumOfWeights()/histo_QCDScaleUp  [ic]->GetSumOfWeights());
      histo_QCDScaleDown[ic]->Scale(histo_Baseline[ic]->GetSumOfWeights()/histo_QCDScaleDown[ic]->GetSumOfWeights());
@@ -616,7 +689,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   // Begin Fix a feature affecting first bin
   for(unsigned ic=kPlotData; ic!=nPlotCategories; ic++) {
-    if(!shouldWriteHistogram(ic, histo_Baseline)) continue;
+    if(!shouldWriteHistogram(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotData) {
       histo_Baseline[ic]->SetBinError(1,sqrt(histo_Baseline[ic]->GetBinContent(1)));
     } else {
@@ -629,11 +702,14 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   TString outdir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/1200/datacards";
   std::filesystem::create_directories(outdir.Data());
-  TString outputLimits = Form("%s/output_%s_%d_bin%d%s.root", outdir.Data(), anaSel.Data(), year, fidAna, additionalSuffix.Data());
+  TString c0Tag = TString::Format("%.6g", c0);
+  c0Tag.ReplaceAll(".", "p");
+  c0Tag.ReplaceAll("-", "m");
+  TString outputLimits = Form("%s/output_%s_%s_%d_bin%d%s.root", outdir.Data(), anaSel.Data(), cfg.op.Data(), year, fidAna, additionalSuffix.Data());
   outputFile = new TFile(outputLimits, "RECREATE");
   outputFile->cd();
   for(unsigned ic=kPlotData; ic!=nPlotCategories; ic++) {
-    if(!shouldWriteHistogram(ic, histo_Baseline)) continue;
+    if(!shouldWriteHistogram(ic, histo_Baseline, cfg)) continue;
 
     histo_Baseline[ic]->Write();
 
@@ -657,8 +733,8 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   outputFile->Close();
 
   // Filling datacards txt file
-  char outputLimitsCard[200];
-  sprintf(outputLimitsCard,"%s/datacard_%s_%d_bin%d%s.txt", outdir.Data(),anaSel.Data(),year,fidAna,additionalSuffix.Data());
+  char outputLimitsCard[1024];
+  sprintf(outputLimitsCard,"%s/datacard_%s_%s_%d_bin%d%s.txt", outdir.Data(), anaSel.Data(), cfg.op.Data(), year, fidAna, additionalSuffix.Data());
   ofstream newcardShape;
   newcardShape.open(outputLimitsCard);
   newcardShape << Form("imax * number of channels\n");
@@ -672,7 +748,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("bin   ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     newcardShape << Form("ch%d ",fidAna);
 
   }
@@ -680,24 +756,24 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("process  ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     newcardShape << Form("%s  ", plotBaseNames[ic].Data());
   }
   newcardShape << Form("\n");
 
   newcardShape << Form("process  ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
-    if     (ic == kPlotEWKSSWW)   newcardShape << Form("%d  ", 1);
-    else if(ic == kPlotEFTM0Int)  newcardShape << Form("%d  ", 2);
-    else if(ic == kPlotEFTM0Quad) newcardShape << Form("%d  ", 3);
-    else                          newcardShape << Form("%d  ", ic);
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
+    if     (ic == kPlotEWKSSWW) newcardShape << Form("%d  ", 1);
+    else if(ic == cfg.intIndex)  newcardShape << Form("%d  ", 2);
+    else if(ic == cfg.quadIndex) newcardShape << Form("%d  ", 3);
+    else                         newcardShape << Form("%d  ", ic);
   }
   newcardShape << Form("\n");
 
   newcardShape << Form("rate  ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     newcardShape << Form("%f  ", histo_Baseline[ic]->GetSumOfWeights());
   }
   newcardShape << Form("\n");
@@ -705,7 +781,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   if(isTypeFakeSyst == 1){
     newcardShape << Form("CMS_SMP25013_fake_%s_m      lnN ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("%6.3f ",1.15);
       else		       newcardShape << Form("- "); 
     }
@@ -713,7 +789,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
     newcardShape << Form("CMS_SMP25013_fake_%s_e lnN ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("%6.3f ",1.15);
       else		       newcardShape << Form("- ");
     }
@@ -722,7 +798,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   else if(isTypeFakeSyst == 2){
     newcardShape << Form("CMS_SMP25013_fake_%s_m0 shape ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("1.0 ");
       else		       newcardShape << Form("- "); 
     }
@@ -730,7 +806,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
     newcardShape << Form("CMS_SMP25013_fake_%s_m1 shape ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("1.0 ");
       else		       newcardShape << Form("- "); 
     }
@@ -738,7 +814,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
     newcardShape << Form("CMS_SMP25013_fake_%s_m2 shape ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("1.0 ");
       else		       newcardShape << Form("- "); 
     }
@@ -746,7 +822,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
     newcardShape << Form("CMS_SMP25013_fake_%s_e0 shape ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("1.0 ");
       else		       newcardShape << Form("- "); 
     }
@@ -754,7 +830,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
     newcardShape << Form("CMS_SMP25013_fake_%s_e1 shape ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("1.0 ");
       else		       newcardShape << Form("- "); 
     }
@@ -762,7 +838,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
     newcardShape << Form("CMS_SMP25013_fake_%s_e2 shape ",nameFakeSyst.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("1.0 ");
       else		       newcardShape << Form("- "); 
     }
@@ -773,7 +849,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
     if(lumiU[nl] == 1) continue;
     newcardShape << Form("lumi_13p6TeV_%d lnN ", nl);
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("- ");
       else                     newcardShape << Form("%6.3f ",lumiU[nl]);
     }
@@ -782,7 +858,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_SMP25013_trigger_%s   lnN     ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("%6.3f ",triggerEffUnc);
   }
@@ -791,7 +867,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   if(anaSel.Contains("sswwAnalysis")) {
     newcardShape << Form("CMS_SMP25013_wrongsign_stat_%s shape ",theTagYear.Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotWS) newcardShape << Form("1.0 ");
       else              newcardShape << Form("- "); 
     }
@@ -800,7 +876,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
     newcardShape << Form("CMS_SMP25013_wrongsign_method shape ");
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotWS) newcardShape << Form("1.0 ");
       else              newcardShape << Form("- "); 
     }
@@ -811,7 +887,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   for(int n_unc=1; n_unc<numberBTagSyst; n_unc++){
     newcardShape << Form("%s shape ",BtagSFBCNames[n_unc].Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("- ");
       else                     newcardShape << Form("1.0 ");
     }
@@ -820,7 +896,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_btag_fixedWP_light_simple shape ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -828,7 +904,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_eff_m_reco_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -836,7 +912,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_eff_m_id_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -844,7 +920,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_eff_m_iso_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -852,7 +928,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_eff_e_reco_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -860,7 +936,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
  
   newcardShape << Form("CMS_eff_e_id shape ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -868,7 +944,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_SMP25013_eff_m_tightid_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -876,7 +952,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_SMP25013_eff_e_tightid_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -884,7 +960,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("pileup_13p6TeV shape ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -894,7 +970,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   for(int n_unc=1; n_unc<numberJESSyst; n_unc++){
     newcardShape << Form("CMS_scale_j_%s shape ",jesNames[n_unc].Data());
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if     (ic == kPlotNonPrompt) newcardShape << Form("- ");
       else                          newcardShape << Form("1.0 ");
     }
@@ -903,7 +979,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_res_j_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -911,7 +987,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
  
   newcardShape << Form("CMS_scale_m_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -919,7 +995,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
  
   newcardShape << Form("CMS_scale_e_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("1.0 ");
   }
@@ -945,18 +1021,18 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("CMS_scale_met_unclustered_energy_%s shape ",theTagYear.Data());
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else		     newcardShape << Form("1.0 ");
   }
   newcardShape << Form("\n");
 
   for(unsigned ic=0; ic<nPlotCategories; ic++) {
-    if(!useProcess(ic, histo_Baseline) || ic == kPlotNonPrompt) continue;
+    if(!useProcess(ic, histo_Baseline, cfg) || ic == kPlotNonPrompt) continue;
     if     ( ic == kPlotEWKSSWW) continue;
     newcardShape << Form("QCD_scale_%s_ACCEPT shape ",plotBaseNames[ic].Data());
     for(unsigned ic2=0; ic2<nPlotCategories; ic2++) {
-      if(!useProcess(ic2, histo_Baseline)) continue;
+      if(!useProcess(ic2, histo_Baseline, cfg)) continue;
       if(ic==ic2) newcardShape << Form("1.0  ");
       else        newcardShape << Form("-  ");
       }
@@ -965,7 +1041,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("QCD_scale_sm_ACCEPT shape ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if     (  ic != kPlotEWKSSWW
             ) newcardShape << Form("- ");
     else      newcardShape << Form("1.0 ");
@@ -973,11 +1049,11 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   newcardShape << Form("\n");
 
   for(unsigned ic=0; ic<nPlotCategories; ic++) {
-    if(!useProcess(ic, histo_Baseline) || ic == kPlotNonPrompt) continue;
+    if(!useProcess(ic, histo_Baseline, cfg) || ic == kPlotNonPrompt) continue;
     if     (ic == kPlotEWKSSWW) continue;
     newcardShape << Form("PS_%s_ACCEPT shape ",plotBaseNames[ic].Data());
     for(unsigned ic2=0; ic2<nPlotCategories; ic2++) {
-      if(!useProcess(ic2, histo_Baseline)) continue;
+      if(!useProcess(ic2, histo_Baseline, cfg)) continue;
       if(ic==ic2) newcardShape << Form("1.0  ");
       else        newcardShape << Form("-  ");
       }
@@ -986,7 +1062,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("PS_sm_ACCEPT shape ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if     ( ic != kPlotEWKSSWW
            ) newcardShape << Form("- ");
     else     newcardShape << Form("1.0 ");
@@ -995,7 +1071,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("WWewkCorr shape ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if     (  ic != kPlotEWKSSWW
             ) newcardShape << Form("- ");
     else      newcardShape << Form("1.0 ");
@@ -1004,7 +1080,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("WZewkCorr shape ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if     (ic != kPlotEWKWZ
             ) newcardShape << Form("- ");
     else      newcardShape << Form("1.0 ");
@@ -1014,7 +1090,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   for(int npdf=100; npdf<=100; npdf++){
     newcardShape << Form("pdf%d shape ",npdf);
     for (int ic=0; ic<nPlotCategories; ic++){
-      if(!useProcess(ic, histo_Baseline)) continue;
+      if(!useProcess(ic, histo_Baseline, cfg)) continue;
       if(ic == kPlotNonPrompt) newcardShape << Form("- ");
       else                     newcardShape << Form("1.0 ");
     }
@@ -1023,7 +1099,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
 
   newcardShape << Form("pdfqq   lnN     ");
   for (int ic=0; ic<nPlotCategories; ic++){
-    if(!useProcess(ic, histo_Baseline)) continue;
+    if(!useProcess(ic, histo_Baseline, cfg)) continue;
     if(ic == kPlotNonPrompt) newcardShape << Form("- ");
     else                     newcardShape << Form("%6.3f ",1.01);
   }

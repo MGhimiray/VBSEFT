@@ -226,7 +226,7 @@ def makeJES(df,year,postFix,bTagSel,jetEtaCut,jetTypeCorr):
 def selectionJetMet(df,year,bTagSel,isData,count,jetEtaCut):
 
     jetTypeCorr = -1
-    if(count > 1000): jetTypeCorr = count%10
+    if(isData == "true" and count > 1000): jetTypeCorr = count%10
     print("jetTypeCorr: {0}".format(jetTypeCorr))
 
     BTAGName = "UParTAK4"

@@ -9,6 +9,8 @@ class TMVAHelperXML():
         self.model_input = model_input
         self.model_name = model_name
         self.nthreads = ROOT.GetThreadPoolSize()
+        print("TMVA nthreads:", self.nthreads, "ROOT pool:", ROOT.GetThreadPoolSize())
+
 
         self.tmva_helper = ROOT.tmva_helper_xml(self.model_input, self.nthreads)
         self.var_col = f"tmva_vars_{self.model_name}"

@@ -1,7 +1,7 @@
 import ROOT
 import os, sys, getopt, json
 
-ROOT.ROOT.EnableImplicitMT(10)
+#ROOT.ROOT.EnableImplicitMT(10)
 from utilsCategory import plotCategory
 from utilsAna import getMClist, getDATAlist
 from utilsAna import SwitchSample, groupFiles, getTriggerFromJson, getLeptomSelFromJson, getLumi
@@ -350,9 +350,17 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
     for x in range(nCat):
         dfwwcat.append(dfbase.Filter("theCat=={0}".format(x), "correct category ({0})".format(x)))
 
-        if((x == plotCategory("kPlotEFTInt") or x == plotCategory("kPlotEFTQuad")) and isData == "false"):
-            dfwwcat[x] = (dfwwcat[x].Define("invariant_mass", "Get_mww(good_GenDressedLepton_pt, good_GenDressedLepton_eta, good_GenDressedLepton_phi, good_GenDressedLepton_mass, good_GenDressedLepton_pz, GenMET_pt, GenMET_phi)")
-                          .Filter ("invariant_mass < {0}".format(cutOff), "mww < {0} GeV".format(cutOff))
+        if((x == plotCategory("kPlotEFTM0Int") or x == plotCategory("kPlotEFTM0Quad") or x == plotCategory("kPlotEFTM1Int") or x == plotCategory("kPlotEFTM1Quad") or x == plotCategory("kPlotEFTM7Int") or x == plotCategory("kPlotEFTM7Quad") or x == plotCategory("kPlotEFTT0Int") or x == plotCategory("kPlotEFTT0Quad") or x == plotCategory("kPlotEFTT1Int") or x == plotCategory("kPlotEFTT1Quad") or x == plotCategory("kPlotEFTT2Int") or x == plotCategory("kPlotEFTT2Quad") or x == plotCategory("kPlotEFTS0Int") or x == plotCategory("kPlotEFTS0Quad")) and isData == "false"):
+            dfwwcat[x] = (dfwwcat[x].Filter(
+                           "good_GenDressedLepton_pt.size() >= 2 && "
+                           "good_GenDressedLepton_eta.size() >= 2 && "
+                           "good_GenDressedLepton_phi.size() >= 2 && "
+                           "good_GenDressedLepton_mass.size() >= 2 && "
+                           "good_GenDressedLepton_pz.size() >= 2",
+                           "at least two good GenDressed leptons"
+                       )
+                          .Define("invariant_mass", "Get_mww(good_GenDressedLepton_pt, good_GenDressedLepton_eta, good_GenDressedLepton_phi, good_GenDressedLepton_mass, good_GenDressedLepton_pz, GenMET_pt, GenMET_phi)")
+                          .Filter("invariant_mass < {0}".format(cutOff), "mww < {0} GeV".format(cutOff))
                           .Define("theGenCat", "{0}".format(0))
                   )
         elif(isData == "true"):
@@ -1291,7 +1299,7 @@ if __name__ == "__main__":
     try:
         if((process >= 0 and process < 1000) or (process >= 1990)):
             readMCSample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff)
-        elif(process >= 1000):
+        elif(process >= 1000 and process < 1990):
             readDASample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3, cutOff)
     except Exception as e:
         print("FAILED {0}".format(e))
