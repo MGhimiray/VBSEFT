@@ -111,12 +111,16 @@ MyCorrections::MyCorrections(int the_input_year) {
   std::string fileNameLUM = dirName+"LUM/"+subDirName+"puWeights.json.gz";
 
   std::string corrNameLUM = "";  
-  if     (year == 20220) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
+  if     (year == 20160) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
+  else if(year == 20161) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
+  else if(year == 20170) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
+  else if(year == 20180) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
+  else if(year == 20220) corrNameLUM = "Collisions2022_355100_357900_eraBCD_GoldenJson";
   else if(year == 20221) corrNameLUM = "Collisions2022_359022_362760_eraEFG_GoldenJson";
   else if(year == 20230) corrNameLUM = "Collisions2023_366403_369802_eraBC_GoldenJson";
   else if(year == 20231) corrNameLUM = "Collisions2023_369803_370790_eraD_GoldenJson";
   else if(year == 20240 ||
-          year == 20250) corrNameLUM = "Collisions2024_378981_386951_GoldenJson";
+          year == 20250) corrNameLUM = "Collisions24_BCDEFGHI_goldenJSON";
   
   auto csetPU = correction::CorrectionSet::from_file(fileNameLUM);
   puSF_ = csetPU->at(corrNameLUM);
@@ -263,17 +267,17 @@ MyCorrections::MyCorrections(int the_input_year) {
     jecDATAName[9] = "NULL";                     jetVetoMapName[9] = "Summer24Prompt24_RunBCDEFGHI_V1"; // J
   }
   else if(year == 20250)  {
-    jecMCName = "Winter25Prompt25_V2_MC"; jerName = "Summer23BPixPrompt23_RunD_JRV1_MC";
-    jecDATAName[0] = "NULL";                     jetVetoMapName[0] = "Winter25Prompt25_RunCDE_V1"; // A
-    jecDATAName[1] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[1] = "Winter25Prompt25_RunCDE_V1"; // B
-    jecDATAName[2] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[2] = "Winter25Prompt25_RunCDE_V1"; // C
-    jecDATAName[3] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[3] = "Winter25Prompt25_RunCDE_V1"; // D
-    jecDATAName[4] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[4] = "Winter25Prompt25_RunCDE_V1"; // E
-    jecDATAName[5] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[5] = "Winter25Prompt25_RunCDE_V1"; // F
-    jecDATAName[6] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[6] = "Winter25Prompt25_RunCDE_V1"; // G
-    jecDATAName[7] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[7] = "Winter25Prompt25_RunCDE_V1"; // H
-    jecDATAName[8] = "Winter25Prompt25_V2_DATA"; jetVetoMapName[8] = "Winter25Prompt25_RunCDE_V1"; // I
-    jecDATAName[9] = "NULL";                     jetVetoMapName[9] = "Winter25Prompt25_RunCDE_V1"; // J
+    jecMCName = "Winter25Prompt25_V3_MC"; jerName = "Summer23BPixPrompt23_RunD_JRV1_MC";
+    jecDATAName[0] = "NULL";                     jetVetoMapName[0] = "Winter25Prompt25_RunCDEFG_V1"; // A
+    jecDATAName[1] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[1] = "Winter25Prompt25_RunCDEFG_V1"; // B
+    jecDATAName[2] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[2] = "Winter25Prompt25_RunCDEFG_V1"; // C
+    jecDATAName[3] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[3] = "Winter25Prompt25_RunCDEFG_V1"; // D
+    jecDATAName[4] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[4] = "Winter25Prompt25_RunCDEFG_V1"; // E
+    jecDATAName[5] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[5] = "Winter25Prompt25_RunCDEFG_V1"; // F
+    jecDATAName[6] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[6] = "Winter25Prompt25_RunCDEFG_V1"; // G
+    jecDATAName[7] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[7] = "Winter25Prompt25_RunCDEFG_V1"; // H
+    jecDATAName[8] = "Winter25Prompt25_V3_DATA"; jetVetoMapName[8] = "Winter25Prompt25_RunCDEFG_V1"; // I
+    jecDATAName[9] = "NULL";                     jetVetoMapName[9] = "Winter25Prompt25_RunCDEFG_V1"; // J
   }
 
   std::string tagName = jecMCName + "_" + "L1L2L3Res" + "_" + algoName;
@@ -486,8 +490,7 @@ double MyCorrections::eval_btvSF(const char *valType, char *workingPoint, double
 
 double MyCorrections::eval_jetCORR(double area, double eta, double phi, double pt, double rho, int run, int type) {
   int theRun = run;
-  if     (year == 20250 && theRun < 392159) theRun = 392159;
-  else if(year == 20250 && theRun > 397852) theRun = 397852;
+  if(year == 20250 && theRun < 392159) theRun = 392159;
   // data
   if(type >= 0 && (year == 20231 || year == 20240 || year == 20250)) return JECDATA_[type]->evaluate({area, eta, pt, rho, phi, (float)theRun});
   else if(type >= 0 && year == 20230)                                return JECDATA_[type]->evaluate({area, eta, pt, rho,      (float)theRun});

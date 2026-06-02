@@ -6,7 +6,7 @@ ROOT.PyConfig.DisableRootLogon = True
 
 if __name__ == "__main__":
     dir = "1001"
-    cutoffs = ["1200"]
+    cutoffs = ["3000"]
     year = "20220, 20221, 20230, 20231, 20240, 20250"
     for cut in cutoffs:
         base = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/{cut}/histo/fillhisto_sswwAnalysis"

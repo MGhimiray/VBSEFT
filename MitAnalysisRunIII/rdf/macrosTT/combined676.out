@@ -1,0 +1,296 @@
+subDirName/year: Run3-25Prompt-Winter25-NanoAODv15/ 20250
+pass JSON : pass=50419      all=50419      -- eff=100.00 % cumulative eff=100.00 %
+Passed trigger: pass=47507      all=50419      -- eff=94.22 % cumulative eff=94.22 %
+Only two loose leptons: pass=47507      all=47507      -- eff=100.00 % cumulative eff=94.22 %
+Two fake leptons: pass=40815      all=47507      -- eff=85.91 % cumulative eff=80.95 %
+Sign-sign leptons: pass=40368      all=40815      -- eff=98.90 % cumulative eff=80.07 %
+Two tight leptons: pass=32299      all=40368      -- eff=80.01 % cumulative eff=64.06 %
+No selected hadronic taus: pass=32224      all=32299      -- eff=99.77 % cumulative eff=63.91 %
+ptl1 > 25 && ptl2 > 20: pass=28289      all=32224      -- eff=87.79 % cumulative eff=56.11 %
+mll > 20 GeV: pass=28114      all=28289      -- eff=99.38 % cumulative eff=55.76 %
+MC weight : pass=28096      all=28114      -- eff=99.94 % cumulative eff=55.73 %
+weightPhoSFJSON > 0: pass=28096      all=28096      -- eff=100.00 % cumulative eff=55.73 %
+weightTauSFJSON > 0: pass=28096      all=28096      -- eff=100.00 % cumulative eff=55.73 %
+correct category (6): pass=28096      all=28096      -- eff=100.00 % cumulative eff=55.73 %
+Z veto    : pass=27108      all=28096      -- eff=96.48 % cumulative eff=53.77 %
+no good b-jets: pass=21836      all=27108      -- eff=80.55 % cumulative eff=43.31 %
+At least two VBS jets: pass=13764      all=21836      -- eff=63.03 % cumulative eff=27.30 %
+VBS selection: pass=10613      all=13764      -- eff=77.11 % cumulative eff=21.05 %
+thePuppiMET_pt > 30.0: pass=9708       all=10613      -- eff=91.47 % cumulative eff=19.25 %
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+Used files: 1
+genEventSum(13): 971413.0 / Events(total/ntuple): 971413.0 / 50419
+WeightExact/Approx 0.003267 / 0.003267 / Cross section: 29.525500
+starting 676 / 6 / 0.003267396308264353 / 20250 / WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8 / false / 0
+TMVA nthreads: 0 ROOT pool: 0
+['ngood_jets', 'vbs_mjj', 'vbs_ptjj', 'vbs_detajj', 'vbs_dphijj', 'vbs_ptj1', 'vbs_ptj2', 'vbs_etaj1', 'vbs_etaj2', 'vbs_zepvv', 'vbs_sumHT', 'vbs_pttot', 'vbs_detavvj1', 'vbs_detavvj2', 'vbs_ptbalance']
+triggerLEP: (HLT_Ele30_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Ele35_WPTight_Gsf||HLT_Ele115_CaloIdVT_GsfTrkIdT) or (HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle25_CaloIdL_MW||HLT_DoublePhoton70) or (HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50) or (HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8) or (HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)
+TIGHT_MU8(15): (fakeable_mu && fake_Muon_mediumPromptId == true && fake_Muon_promptMVA > 0.7)
+TIGHT_EL7(15): (fakeable_el && fake_Electron_promptMVA > 0.9 && fake_Electron_tightCharge == 2)
+jetTypeCorr: -1
+MUOYEAR/ELEYEAR/PHOYEAR/MUOWP/ELEWP/whichAna: 20250/2024Prompt/2024Prompt/Medium/Medium/1
+BtagCorr/AddCorr: 1/1
+ROOT::VecOps::RVec<float>
+doNtuples=False, x=0, theCat=6
+doNtuples=False, x=1, theCat=6
+doNtuples=False, x=2, theCat=6
+doNtuples=False, x=3, theCat=6
+doNtuples=False, x=4, theCat=6
+doNtuples=False, x=5, theCat=6
+doNtuples=False, x=6, theCat=6
+doNtuples=False, x=7, theCat=6
+doNtuples=False, x=8, theCat=6
+doNtuples=False, x=9, theCat=6
+doNtuples=False, x=10, theCat=6
+doNtuples=False, x=11, theCat=6
+doNtuples=False, x=12, theCat=6
+doNtuples=False, x=13, theCat=6
+doNtuples=False, x=14, theCat=6
+doNtuples=False, x=15, theCat=6
+doNtuples=False, x=16, theCat=6
+doNtuples=False, x=17, theCat=6
+doNtuples=False, x=18, theCat=6
+doNtuples=False, x=19, theCat=6
+doNtuples=False, x=20, theCat=6
+doNtuples=False, x=21, theCat=6
+doNtuples=False, x=22, theCat=6
+doNtuples=False, x=23, theCat=6
+doNtuples=False, x=24, theCat=6
+doNtuples=False, x=25, theCat=6
+doNtuples=False, x=26, theCat=6
+doNtuples=False, x=27, theCat=6
+doNtuples=False, x=28, theCat=6
+doNtuples=False, x=29, theCat=6
+doNtuples=False, x=30, theCat=6
+doNtuples=False, x=31, theCat=6
+doNtuples=False, x=32, theCat=6
+doNtuples=False, x=33, theCat=6
+doNtuples=False, x=34, theCat=6
+doNtuples=False, x=35, theCat=6
+doNtuples=False, x=36, theCat=6
+doNtuples=False, x=37, theCat=6
+doNtuples=False, x=38, theCat=6
+doNtuples=False, x=39, theCat=6
+---------------- SUMMARY 6 -------------
+subDirName/year: Run3-25Prompt-Winter25-NanoAODv15/ 20250
+pass JSON : pass=330456     all=330456     -- eff=100.00 % cumulative eff=100.00 %
+Passed trigger: pass=311356     all=330456     -- eff=94.22 % cumulative eff=94.22 %
+Only two loose leptons: pass=311356     all=311356     -- eff=100.00 % cumulative eff=94.22 %
+Two fake leptons: pass=266985     all=311356     -- eff=85.75 % cumulative eff=80.79 %
+Sign-sign leptons: pass=264166     all=266985     -- eff=98.94 % cumulative eff=79.94 %
+Two tight leptons: pass=211886     all=264166     -- eff=80.21 % cumulative eff=64.12 %
+No selected hadronic taus: pass=211298     all=211886     -- eff=99.72 % cumulative eff=63.94 %
+ptl1 > 25 && ptl2 > 20: pass=185570     all=211298     -- eff=87.82 % cumulative eff=56.16 %
+mll > 20 GeV: pass=184509     all=185570     -- eff=99.43 % cumulative eff=55.83 %
+MC weight : pass=184357     all=184509     -- eff=99.92 % cumulative eff=55.79 %
+weightPhoSFJSON > 0: pass=184357     all=184357     -- eff=100.00 % cumulative eff=55.79 %
+weightTauSFJSON > 0: pass=184357     all=184357     -- eff=100.00 % cumulative eff=55.79 %
+correct category (6): pass=184357     all=184357     -- eff=100.00 % cumulative eff=55.79 %
+Z veto    : pass=177760     all=184357     -- eff=96.42 % cumulative eff=53.79 %
+no good b-jets: pass=143632     all=177760     -- eff=80.80 % cumulative eff=43.46 %
+At least two VBS jets: pass=90125      all=143632     -- eff=62.75 % cumulative eff=27.27 %
+VBS selection: pass=69197      all=90125      -- eff=76.78 % cumulative eff=20.94 %
+thePuppiMET_pt > 30.0: pass=63075      all=69197      -- eff=91.15 % cumulative eff=19.09 %
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+Used files: 1
+genEventSum(13): 971413.0 / Events(total/ntuple): 971413.0 / 330456
+WeightExact/Approx 0.003267 / 0.003267 / Cross section: 29.525500
+starting 676 / 6 / 0.003267396308264353 / 20250 / WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8 / false / 1
+TMVA nthreads: 0 ROOT pool: 0
+['ngood_jets', 'vbs_mjj', 'vbs_ptjj', 'vbs_detajj', 'vbs_dphijj', 'vbs_ptj1', 'vbs_ptj2', 'vbs_etaj1', 'vbs_etaj2', 'vbs_zepvv', 'vbs_sumHT', 'vbs_pttot', 'vbs_detavvj1', 'vbs_detavvj2', 'vbs_ptbalance']
+triggerLEP: (HLT_Ele30_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Ele35_WPTight_Gsf||HLT_Ele115_CaloIdVT_GsfTrkIdT) or (HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle25_CaloIdL_MW||HLT_DoublePhoton70) or (HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50) or (HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8) or (HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)
+TIGHT_MU8(15): (fakeable_mu && fake_Muon_mediumPromptId == true && fake_Muon_promptMVA > 0.7)
+TIGHT_EL7(15): (fakeable_el && fake_Electron_promptMVA > 0.9 && fake_Electron_tightCharge == 2)
+jetTypeCorr: -1
+MUOYEAR/ELEYEAR/PHOYEAR/MUOWP/ELEWP/whichAna: 20250/2024Prompt/2024Prompt/Medium/Medium/1
+BtagCorr/AddCorr: 1/1
+ROOT::VecOps::RVec<float>
+doNtuples=False, x=0, theCat=6
+doNtuples=False, x=1, theCat=6
+doNtuples=False, x=2, theCat=6
+doNtuples=False, x=3, theCat=6
+doNtuples=False, x=4, theCat=6
+doNtuples=False, x=5, theCat=6
+doNtuples=False, x=6, theCat=6
+doNtuples=False, x=7, theCat=6
+doNtuples=False, x=8, theCat=6
+doNtuples=False, x=9, theCat=6
+doNtuples=False, x=10, theCat=6
+doNtuples=False, x=11, theCat=6
+doNtuples=False, x=12, theCat=6
+doNtuples=False, x=13, theCat=6
+doNtuples=False, x=14, theCat=6
+doNtuples=False, x=15, theCat=6
+doNtuples=False, x=16, theCat=6
+doNtuples=False, x=17, theCat=6
+doNtuples=False, x=18, theCat=6
+doNtuples=False, x=19, theCat=6
+doNtuples=False, x=20, theCat=6
+doNtuples=False, x=21, theCat=6
+doNtuples=False, x=22, theCat=6
+doNtuples=False, x=23, theCat=6
+doNtuples=False, x=24, theCat=6
+doNtuples=False, x=25, theCat=6
+doNtuples=False, x=26, theCat=6
+doNtuples=False, x=27, theCat=6
+doNtuples=False, x=28, theCat=6
+doNtuples=False, x=29, theCat=6
+doNtuples=False, x=30, theCat=6
+doNtuples=False, x=31, theCat=6
+doNtuples=False, x=32, theCat=6
+doNtuples=False, x=33, theCat=6
+doNtuples=False, x=34, theCat=6
+doNtuples=False, x=35, theCat=6
+doNtuples=False, x=36, theCat=6
+doNtuples=False, x=37, theCat=6
+doNtuples=False, x=38, theCat=6
+doNtuples=False, x=39, theCat=6
+---------------- SUMMARY 6 -------------
+subDirName/year: Run3-25Prompt-Winter25-NanoAODv15/ 20250
+pass JSON : pass=14457      all=14457      -- eff=100.00 % cumulative eff=100.00 %
+Passed trigger: pass=13671      all=14457      -- eff=94.56 % cumulative eff=94.56 %
+Only two loose leptons: pass=13671      all=13671      -- eff=100.00 % cumulative eff=94.56 %
+Two fake leptons: pass=11756      all=13671      -- eff=85.99 % cumulative eff=81.32 %
+Sign-sign leptons: pass=11630      all=11756      -- eff=98.93 % cumulative eff=80.45 %
+Two tight leptons: pass=9341       all=11630      -- eff=80.32 % cumulative eff=64.61 %
+No selected hadronic taus: pass=9317       all=9341       -- eff=99.74 % cumulative eff=64.45 %
+ptl1 > 25 && ptl2 > 20: pass=8188       all=9317       -- eff=87.88 % cumulative eff=56.64 %
+mll > 20 GeV: pass=8142       all=8188       -- eff=99.44 % cumulative eff=56.32 %
+MC weight : pass=8132       all=8142       -- eff=99.88 % cumulative eff=56.25 %
+weightPhoSFJSON > 0: pass=8132       all=8132       -- eff=100.00 % cumulative eff=56.25 %
+weightTauSFJSON > 0: pass=8132       all=8132       -- eff=100.00 % cumulative eff=56.25 %
+correct category (6): pass=8132       all=8132       -- eff=100.00 % cumulative eff=56.25 %
+Z veto    : pass=7828       all=8132       -- eff=96.26 % cumulative eff=54.15 %
+no good b-jets: pass=6321       all=7828       -- eff=80.75 % cumulative eff=43.72 %
+At least two VBS jets: pass=3986       all=6321       -- eff=63.06 % cumulative eff=27.57 %
+VBS selection: pass=3044       all=3986       -- eff=76.37 % cumulative eff=21.06 %
+thePuppiMET_pt > 30.0: pass=2771       all=3044       -- eff=91.03 % cumulative eff=19.17 %
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+Used files: 1
+genEventSum(13): 971413.0 / Events(total/ntuple): 971413.0 / 14457
+WeightExact/Approx 0.003267 / 0.003267 / Cross section: 29.525500
+starting 676 / 6 / 0.003267396308264353 / 20250 / WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8 / false / 2
+TMVA nthreads: 0 ROOT pool: 0
+['ngood_jets', 'vbs_mjj', 'vbs_ptjj', 'vbs_detajj', 'vbs_dphijj', 'vbs_ptj1', 'vbs_ptj2', 'vbs_etaj1', 'vbs_etaj2', 'vbs_zepvv', 'vbs_sumHT', 'vbs_pttot', 'vbs_detavvj1', 'vbs_detavvj2', 'vbs_ptbalance']
+triggerLEP: (HLT_Ele30_WPTight_Gsf||HLT_Ele32_WPTight_Gsf||HLT_Ele32_WPTight_Gsf_L1DoubleEG||HLT_Ele35_WPTight_Gsf||HLT_Ele115_CaloIdVT_GsfTrkIdT) or (HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_DoubleEle25_CaloIdL_MW||HLT_DoublePhoton70) or (HLT_IsoMu24||HLT_IsoMu27||HLT_Mu50) or (HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8||HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8) or (HLT_Mu12_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL||HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ||HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ)
+TIGHT_MU8(15): (fakeable_mu && fake_Muon_mediumPromptId == true && fake_Muon_promptMVA > 0.7)
+TIGHT_EL7(15): (fakeable_el && fake_Electron_promptMVA > 0.9 && fake_Electron_tightCharge == 2)
+jetTypeCorr: -1
+MUOYEAR/ELEYEAR/PHOYEAR/MUOWP/ELEWP/whichAna: 20250/2024Prompt/2024Prompt/Medium/Medium/1
+BtagCorr/AddCorr: 1/1
+ROOT::VecOps::RVec<float>
+doNtuples=False, x=0, theCat=6
+doNtuples=False, x=1, theCat=6
+doNtuples=False, x=2, theCat=6
+doNtuples=False, x=3, theCat=6
+doNtuples=False, x=4, theCat=6
+doNtuples=False, x=5, theCat=6
+doNtuples=False, x=6, theCat=6
+doNtuples=False, x=7, theCat=6
+doNtuples=False, x=8, theCat=6
+doNtuples=False, x=9, theCat=6
+doNtuples=False, x=10, theCat=6
+doNtuples=False, x=11, theCat=6
+doNtuples=False, x=12, theCat=6
+doNtuples=False, x=13, theCat=6
+doNtuples=False, x=14, theCat=6
+doNtuples=False, x=15, theCat=6
+doNtuples=False, x=16, theCat=6
+doNtuples=False, x=17, theCat=6
+doNtuples=False, x=18, theCat=6
+doNtuples=False, x=19, theCat=6
+doNtuples=False, x=20, theCat=6
+doNtuples=False, x=21, theCat=6
+doNtuples=False, x=22, theCat=6
+doNtuples=False, x=23, theCat=6
+doNtuples=False, x=24, theCat=6
+doNtuples=False, x=25, theCat=6
+doNtuples=False, x=26, theCat=6
+doNtuples=False, x=27, theCat=6
+doNtuples=False, x=28, theCat=6
+doNtuples=False, x=29, theCat=6
+doNtuples=False, x=30, theCat=6
+doNtuples=False, x=31, theCat=6
+doNtuples=False, x=32, theCat=6
+doNtuples=False, x=33, theCat=6
+doNtuples=False, x=34, theCat=6
+doNtuples=False, x=35, theCat=6
+doNtuples=False, x=36, theCat=6
+doNtuples=False, x=37, theCat=6
+doNtuples=False, x=38, theCat=6
+doNtuples=False, x=39, theCat=6
+---------------- SUMMARY 6 -------------
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+no files in job/group: 3 / 10
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+no files in job/group: 4 / 10
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+no files in job/group: 5 / 10
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+no files in job/group: 6 / 10
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+no files in job/group: 7 / 10
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+no files in job/group: 8 / 10
+/mnt/home/mghimiray/VBSStudies/DATA/Monte_Carlo/2024/2l/WWJJto2L2Nu-SS-noTop-EWK_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM
+Total files: 3
+Number of Theory replicas: 103 / 9 / 4
+genEventSumLHEScaleRenorm:  [1.0642375895041458, 1.0, 1.0642375895041458, 0.9428828288065536, 1.0, 0.9428828288065536]
+genEventSumPSRenorm:  [0.9999169047927713, 0.9989471502445278, 0.9999446900278447, 1.0023519284694549]
+lumi(20250/9) = 107.5
+lumi(20250/9) = 107.5
+no files in job/group: 9 / 10

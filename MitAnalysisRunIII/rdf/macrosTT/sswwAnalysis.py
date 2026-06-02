@@ -9,7 +9,7 @@ from utilsSelection import selectionTauVeto, selectionPhoton, selectionJetMet, s
 import tmva_helper_xml
 
 correctionString = "_correction"
-makeDataCards = 1 # 1 (mjj diff), 2 (mll diff), 3 (njets diff), 4 (detajj diff), 5 (dphijj diff), 6 (mjj), 7 (mll), 8 (detajj), 9 (dphijj)
+makeDataCards = 1 # 1 (mjj diff), 2 (mll diff), 3 (njets diff), 4 (detajj diff), 5 (dphijj diff), 6 (mjj), 7 (mll), 8 (detajj), 9 (dphijj), 10 (M01), 11 (M1T)
 genVBSSel = makeDataCards
 if(genVBSSel == 7):
     genVBSSel = 1
@@ -40,6 +40,10 @@ if makeDataCards == 8:
     dirT2 = "1008"
 if makeDataCards == 9:
     dirT2 = "1009"
+if makeDataCards == 10:
+    dirT2 = "1010"
+if makeDataCards == 11:
+    dirT2 = "1011"
 
 doNtuples = False
 # 0 = T, 1 = M, 2 = L
@@ -66,7 +70,7 @@ VBSSEL = jsonObject['VBSSEL']
 VBSQCDSEL = jsonObject['VBSQCDSEL']
 
 altMass = "Def"
-jetEtaCut = 4.9
+jetEtaCut = 4.7
 metCut = 30.0
 
 muSelChoice = 8
@@ -661,6 +665,10 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 varSel = 22
             elif(makeDataCards == 9):
                 varSel = 23
+            elif(makeDataCards == 10):
+                varSel = 30
+            elif(makeDataCards == 11):
+                varSel = 31
             dfwwvbscat             [x] = dfwwvbscat             [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,0.0,0.0,mll{0},ngood_jets,{1})".format(altMass,varSel))
             dfwwvbscatMuonMomUp    [x] = dfwwvbscatMuonMomUp    [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,0.0,0.0,mllMuonMomUp,ngood_jets,{1})".format(altMass,varSel))
             dfwwvbscatElectronMomUp[x] = dfwwvbscatElectronMomUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,0.0,0.0,mllElectronMomUp,ngood_jets,{1})".format(altMass,varSel))
@@ -706,6 +714,10 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 varSel = 22
             elif(makeDataCards == 9):
                 varSel = 23
+            elif(makeDataCards == 10):
+                varSel = 30
+            elif(makeDataCards == 11):
+                varSel = 31
             dfwwbvbscat             [x] = dfwwbvbscat             [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,0.0,0.0,mll{0},ngood_jets,{1})".format(altMass,varSel))
             dfwwbvbscatMuonMomUp    [x] = dfwwbvbscatMuonMomUp    [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,0.0,0.0,mllMuonMomUp,ngood_jets,{1})".format(altMass,varSel))
             dfwwbvbscatElectronMomUp[x] = dfwwbvbscatElectronMomUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,0.0,0.0,mllElectronMomUp,ngood_jets,{1})".format(altMass,varSel))
@@ -768,6 +780,10 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 BinXF1 = 8
                 minXF1 = -0.5
                 maxXF1 =  7.5
+            elif(makeDataCards == 10 or makeDataCards == 11):
+                BinXF1 = 6
+                minXF1 = -0.5
+                maxXF1 =  5.5
             histo[110][x] = dfwwvbscat[x] .Histo1D(("histo_{0}_{1}".format(110,x), "histo_{0}_{1}".format(110,x),BinXF1,minXF1,maxXF1), "finalVar","weight")
 
             BinXF2 = 4

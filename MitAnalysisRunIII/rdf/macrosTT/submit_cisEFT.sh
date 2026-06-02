@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#./submit_cisEFT.sh 2023
 # Define mapping between years and corresponding processes
 whichyear=$1
 if [ "$whichyear" = "2023" ]; then
@@ -19,7 +19,7 @@ elif [ "$whichyear" = "2025" ]; then
     which_job="0 1 2 3 4 5 6 7 8 9"
 fi
 
-cutoff="1200"
+cutoff="3000"
 # Iterate over each year
 for year in "${!year_process_map[@]}"; do
     echo "Year: $year"

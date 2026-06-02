@@ -1540,6 +1540,7 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     else if(dphijj < 2.9) typeSelAux5 = 2;
     else                  typeSelAux5 = 3;
 
+
     if     (var == 1 | var == 2){ // VBS W+W+ SR mjj - mll
       return (float)(typeSelAux1+4*typeSelAux2);
     }
@@ -1559,6 +1560,7 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     
     return 0.0;
   }
+
   else if(var == 20){ // mjj
     return mjj;
   }
