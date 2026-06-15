@@ -7,14 +7,14 @@ Two fake leptons: pass=319556     all=372534     -- eff= 85.78 % cumulative eff=
 Sign-sign leptons: pass=316164     all=319556     -- eff= 98.94 % cumulative eff= 79.97 %
 Two tight leptons: pass=253526     all=316164     -- eff= 80.19 % cumulative eff= 64.13 %
 No selected hadronic taus: pass=252839     all=253526     -- eff= 99.73 % cumulative eff= 63.96 %
-ptl1 > 25 && ptl2 > 20: pass=222047     all=252839     -- eff= 87.82 % cumulative eff= 56.17 %
-mll > 20 GeV: pass=220765     all=222047     -- eff= 99.42 % cumulative eff= 55.84 %
-MC weight: pass=220585     all=220765     -- eff= 99.92 % cumulative eff= 55.80 %
-weightPhoSFJSON > 0: pass=220585     all=220585     -- eff=100.00 % cumulative eff= 55.80 %
-weightTauSFJSON > 0: pass=220585     all=220585     -- eff=100.00 % cumulative eff= 55.80 %
-correct category (6): pass=220585     all=220585     -- eff=100.00 % cumulative eff= 55.80 %
-Z veto: pass=212696     all=220585     -- eff= 96.42 % cumulative eff= 53.80 %
-no good b-jets: pass=171789     all=212696     -- eff= 80.77 % cumulative eff= 43.45 %
-At least two VBS jets: pass=107875     all=171789     -- eff= 62.80 % cumulative eff= 27.29 %
-VBS selection: pass=82854      all=107875     -- eff= 76.81 % cumulative eff= 20.96 %
-thePuppiMET_pt > 30.0: pass=75554      all=82854      -- eff= 91.19 % cumulative eff= 19.11 %
+ptl1 > 25 && ptl2 > 20: pass=221964     all=252839     -- eff= 87.79 % cumulative eff= 56.15 %
+mll > 20 GeV: pass=220693     all=221964     -- eff= 99.43 % cumulative eff= 55.82 %
+MC weight: pass=220593     all=220693     -- eff= 99.95 % cumulative eff= 55.80 %
+weightPhoSFJSON > 0: pass=220593     all=220593     -- eff=100.00 % cumulative eff= 55.80 %
+weightTauSFJSON > 0: pass=220593     all=220593     -- eff=100.00 % cumulative eff= 55.80 %
+correct category (6): pass=220593     all=220593     -- eff=100.00 % cumulative eff= 55.80 %
+Z veto: pass=212707     all=220593     -- eff= 96.43 % cumulative eff= 53.80 %
+no good b-jets: pass=171734     all=212707     -- eff= 80.74 % cumulative eff= 43.44 %
+At least two VBS jets: pass=107870     all=171734     -- eff= 62.81 % cumulative eff= 27.29 %
+VBS selection: pass=82837      all=107870     -- eff= 76.79 % cumulative eff= 20.95 %
+thePuppiMET_pt > 30.0: pass=75539      all=82837      -- eff= 91.19 % cumulative eff= 19.11 %

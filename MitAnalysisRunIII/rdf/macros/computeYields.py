@@ -5,7 +5,7 @@ from utilsCategory import plotCategory
 
 if __name__ == "__main__":
     path = "fillhisto_sswwAnalysis1001"
-    year = 2022
+    year = 2025
     output = "anaZ"
     showUnc = 0
 

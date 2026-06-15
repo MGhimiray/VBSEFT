@@ -27,6 +27,10 @@ def getBTagCut_DeepJet(type,year):
        value[0] = 0.6563
        value[1] = 0.2435
        value[2] = 0.0480
+    elif(year == 20250):
+       value[0] = 0.6563
+       value[1] = 0.2435
+       value[2] = 0.0480
 
     return value[type]
 
@@ -52,6 +56,10 @@ def getBTagCut_PNet(type,year):
        value[1] = 0.1919
        value[2] = 0.0359
     elif(year == 20240):
+       value[0] = 0.6133
+       value[1] = 0.1919
+       value[2] = 0.0359
+    elif(year == 20250):
        value[0] = 0.6133
        value[1] = 0.1919
        value[2] = 0.0359
@@ -83,6 +91,10 @@ def getBTagCut(type,year):
        value[0] = 0.4648
        value[1] = 0.1272
        value[2] = 0.0246
+    elif(year == 20250):
+       value[0] = 0.4648
+       value[1] = 0.1272
+       value[2] = 0.0246
 
     return value[type]
 
@@ -105,6 +117,7 @@ def selectionGenLepJet(df,ptlcut,ptjcut,etajcut):
               .Define("good_GenJet_mass",          "GenJet_mass[good_GenJet]")
               .Define("good_GenJet_hadronFlavour", "GenJet_hadronFlavour[good_GenJet]")
               .Define("good_GenJet_partonFlavour", "GenJet_partonFlavour[good_GenJet]")
+              .Define("good_GenDressedLepton_pz" ,"Getpz(good_GenDressedLepton_pt, good_GenDressedLepton_eta)")
               )
 
     return dftag
@@ -669,6 +682,18 @@ def selectionTrigger2L(df,year,PDType,JSON,isData,triggerSEL,triggerDEL,triggerS
 
     elif(year == 2024):
         triggerLEP = "{0} or {1} or {2} or {3} or {4}".format(triggerSEL,triggerDEL,triggerSMU,triggerDMU,triggerMUEG)
+    
+    elif(year == 2025 and PDType == "MuonEG"):
+        triggerLEP = "{0}".format(triggerMUEG)
+
+    elif(year == 2025 and PDType == "Muon"):
+        triggerLEP = "({0} or {1}) and not {2}".format(triggerDMU,triggerSMU,triggerMUEG)
+
+    elif(year == 2025 and PDType == "EGamma"):
+        triggerLEP = "({0} or {1}) and not {2} and not {3} and not {4}".format(triggerSEL,triggerDEL,triggerSMU,triggerDMU,triggerMUEG)
+
+    elif(year == 2025):
+        triggerLEP = "{0} or {1} or {2} or {3} or {4}".format(triggerSEL,triggerDEL,triggerSMU,triggerDMU,triggerMUEG)
 
     else:
         print("PROBLEM with triggers!!!")
@@ -712,8 +737,16 @@ def selectionTrigger1L(df,year,PDType,JSON,isData,triggerFAKEMU,triggerFAKEEL):
         triggerFAKE = triggerFAKEMU
     elif(year == 2024 and PDType == "EGamma"):
         triggerFAKE =  triggerFAKEEL
+    elif(year == 2025 and PDType == "Muon"):
+        triggerFAKE = triggerFAKEMU
+    elif(year == 2025 and PDType == "EGamma"):
+        triggerFAKE =  triggerFAKEEL
     elif(PDType == "MuonEG"):
         triggerFAKE =  "0"
+    elif(year == 2016):
+        triggerFAKE = "{0} or {1}".format(triggerFAKEMU,triggerFAKEEL)
+    elif(year == 2017):
+        triggerFAKE = "{0} or {1}".format(triggerFAKEMU,triggerFAKEEL)
     elif(year == 2018):
         triggerFAKE = "{0} or {1}".format(triggerFAKEMU,triggerFAKEEL)
     elif(year == 2022):
@@ -721,6 +754,8 @@ def selectionTrigger1L(df,year,PDType,JSON,isData,triggerFAKEMU,triggerFAKEEL):
     elif(year == 2023):
         triggerFAKE = "{0} or {1}".format(triggerFAKEMU,triggerFAKEEL)
     elif(year == 2024):
+        triggerFAKE = "{0} or {1}".format(triggerFAKEMU,triggerFAKEEL)
+    elif(year == 2025):
         triggerFAKE = "{0} or {1}".format(triggerFAKEMU,triggerFAKEEL)
     else:
         print("PROBLEM with triggers!!!")
@@ -871,12 +906,14 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
     elif(year == 20230): ELEYEAR = "2023PromptC"
     elif(year == 20231): ELEYEAR = "2023PromptD"
     elif(year == 20240): ELEYEAR = "2024Prompt"
+    elif(year == 20250): ELEYEAR = "2024Prompt"
     PHOYEAR = "NULL"
     if  (year == 20220): PHOYEAR = "2022Re-recoBCD"
     elif(year == 20221): PHOYEAR = "2022Re-recoE+PromptFG"
     elif(year == 20230): PHOYEAR = "2023PromptC"
     elif(year == 20231): PHOYEAR = "2023PromptD"
     elif(year == 20240): PHOYEAR = "2024_ID"
+    elif(year == 20250): PHOYEAR = "2024Prompt"
     if(correctionString == "_correction"):
         MUOWP = "Medium"
         ELEWP = "Medium"
@@ -926,7 +963,7 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
         if(useBTaggingWeights == 1):
             print("BtagCorr/AddCorr: 1/1")
             dftag = (dftag
-                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
+                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
                      .Define("weightMuoCorr","weightMuoSFJSON*weightMuonSF")
                      .Define("weightEleCorr","weightEleSFJSON*weightElectronSF")
                      .Define("weightMuonTightSFUp"  ,"weight/weightMuonSF*compute_MuonSF(fake_Muon_pt,fake_Muon_eta,+1.0)")
@@ -937,7 +974,7 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
         else:
             print("BtagCorr/AddCorr: 0/1")
             dftag = (dftag
-                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
+                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON*weightMuonSF*weightElectronSF")
                      .Define("weightMuoCorr","weightMuoSFJSON*weightMuonSF")
                      .Define("weightEleCorr","weightEleSFJSON*weightElectronSF")
                      .Define("weightMuonTightSFUp"  ,"weight/weightMuonSF*compute_MuonSF(fake_Muon_pt,fake_Muon_eta,+1.0)")
@@ -950,7 +987,7 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
         if(useBTaggingWeights == 1):
             print("BtagCorr/AddCorr: 1/0")
             dftag = (dftag
-                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
+                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightBtagSF*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
                      .Define("weightMuoCorr","weightMuoSFJSON")
                      .Define("weightEleCorr","weightEleSFJSON")
                      .Define("weightMuonTightSFUp"  ,"weight")
@@ -961,7 +998,7 @@ def selectionMCWeigths(df,year,PDType,weight,type,bTagSel,useBTaggingWeights,nTh
         else:
             print("BtagCorr/AddCorr: 0/0")
             dftag = (dftag
-                     .Define("weight","weightMC*weightFake*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
+                     .Define("weight","weightMC*weightWS*weightEWKCorr*weightPURecoSF*weightTriggerSF*weightMuoSFJSON*weightEleSFJSON")
                      .Define("weightMuoCorr","weightMuoSFJSON")
                      .Define("weightEleCorr","weightEleSFJSON")
                      .Define("weightMuonTightSFUp"  ,"weight")

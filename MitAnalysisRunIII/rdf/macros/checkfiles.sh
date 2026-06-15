@@ -7,9 +7,10 @@ set -uo pipefail
 
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
+cutoff=1200
 
 # Verify the capitalization ("matrix_method" vs "Matrix_method") matches your FS.
-outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${whichana}/histo/fillhisto_sswwAnalysis"
+outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${whichana}/${cutoff}/histo/fillhisto_sswwAnalysis"
 
 echo "== Check files =="
 echo " year     : $year"
@@ -57,9 +58,9 @@ esac
 # Helper: infer the highest completed job index already present for a (tag, sample).
 # Returns -1 if none found.
 get_max_seen_job() {
-  local tag="$1" sample="$2"
+  local tag="$1" sample="$2" 
   shopt -s nullglob
-  local arr=( "$outdir"/fillhisto_sswwAnalysis1001_sample"${sample}"_year"${tag}"1_job*.root )
+  local arr=( "$outdir"/fillhisto_sswwAnalysis"${whichana}"_sample"${sample}"_year"${tag}"1_job*.root )
   shopt -u nullglob
   local max=-1 f
   for f in "${arr[@]}"; do
@@ -79,7 +80,7 @@ total_found=0
 for tag in "${tags[@]}"; do
   for sample in ${samples[$tag]}; do
     for job in $jobs_list; do
-      f="$outdir/fillhisto_sswwAnalysis1001_sample${sample}_year${tag}1_job${job}.root"
+      f="$outdir/fillhisto_sswwAnalysis${whichana}_sample${sample}_year${tag}1_job${job}.root"
       (( total_expected++ ))
       if [[ -s "$f" ]]; then
         (( total_found++ ))
@@ -133,7 +134,7 @@ if ((${#missing_detail[@]})); then
              --job-name="vbsmatrixmethod_${year}_${sample}_${job}" \
              --output="log/vbs__${year}_${sample}_${job}.out" \
              --error="log/vbs__${year}_${sample}_${job}.err" \
-             submit_cis_analysis.sh "$tag" "$sample" "$job" \
+             submit_cis_analysis.sh "$tag" "$sample" "$job" "$cutoff" \
         || echo "  (warn) submit failed for $tag $sample $job"
     fi
   done < <(printf "%s\n" "${missing_detail[@]}")

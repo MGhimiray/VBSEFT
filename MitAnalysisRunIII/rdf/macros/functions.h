@@ -632,7 +632,7 @@ Vec_f compute_MUOPT_Unc(const int year, const Vec_f& mu_pt, const Vec_f& mu_eta,
        else printf("PROBLEM in compute_MUOPT_Unc\n");
     }
   }*/
-  if(year == 20220 || year == 20221 || year == 20230 || year == 20231 || year == 20240){
+  if(year == 20220 || year == 20221 || year == 20230 || year == 20231 || year == 20240 || year == 20250){
     for(unsigned int i=0;i<mu_pt.size();i++) {
       if(type == 10) new_mu_pt[i] = corrSFs.eval_muon_pt_scale(1, mu_pt[i], mu_eta[i], mu_phi[i], mu_charge[i]);
       else {
@@ -669,7 +669,7 @@ Vec_f compute_ELEPT_Unc(const int year, const int type, const Vec_i& gain, const
   bool debug = false;
   if(debug) printf("eleEnergy: %lu %d\n",pt.size(),type);
 
-  if(year == 20220 || year == 20221 || year == 20230 || year == 20231 || year == 20240){
+  if(year == 20220 || year == 20221 || year == 20230 || year == 20231 || year == 20240 || year == 20250){
     if    (type == 10) { // data
       for(unsigned int i=0;i<pt.size();i++) {
         new_pt[i] = pt[i]*corrSFs.eval_electronEtDependentScale((char*)"scale", (double)run, eta[i], r9[i], pt[i], gain[i]);
@@ -1508,19 +1508,20 @@ float compute_jet_x_gamma_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass,
   return theVar;
 }
 // Jet-lepton final variables
-float compute_jet_lepton_final_var(const float mjj, const float detajj, const float dphijj, const float zepvv, const float bdt, const float mll, const int njets, unsigned int var)
+float compute_jet_lepton_final_var(const float mjj, const float detajj, const float dphijj, const float zepvv, const float bdt_inc, const float mll, const int njets, const float M01, const float M1T, const float MT, unsigned int var)
 {
   if     (var < 10){
     int typeSelAux1 = -1;
-    if     (mjj <  900) typeSelAux1 = 0;
-    else if(mjj < 1300) typeSelAux1 = 1;
-    else if(mjj < 2000) typeSelAux1 = 2;
+    if     (mjj <  800) typeSelAux1 = 0;
+    else if(mjj < 1200) typeSelAux1 = 1;
+    else if(mjj < 1800) typeSelAux1 = 2;
     else                typeSelAux1 = 3;
   
     float typeSelAux2 = -1;
-    if     (mll <  80) typeSelAux2 = 0;
-    else if(mll < 140) typeSelAux2 = 1;
-    else if(mll < 220) typeSelAux2 = 2;
+    if     (mll < 150) typeSelAux2 = 0;
+    else if(mll < 300) typeSelAux2 = 1;
+    else if(mll < 450) typeSelAux2 = 2;
+    else if(mll < 600) typeSelAux2 = 3;
     else               typeSelAux2 = 3;
     
     float typeSelAux3 = -1;
@@ -1540,7 +1541,7 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     else if(dphijj < 2.9) typeSelAux5 = 2;
     else                  typeSelAux5 = 3;
 
-    if     (var == 1 | var == 2){ // VBS W+W+ SR mjj - mll
+    if     (var == 1 || var == 2){ // VBS W+W+ SR mjj - mll
       return (float)(typeSelAux1+4*typeSelAux2);
     }
     else if(var == 3){ // VBS W+W+ SR mjj - njets
@@ -1576,9 +1577,9 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
   }
   else if(var == 10 || var == 11){
     int typeSelAux1 = -1;
-    if     (mjj <  900) typeSelAux1 = 0;
-    else if(mjj < 1300) typeSelAux1 = 1;
-    else if(mjj < 2000) typeSelAux1 = 2;
+    if     (mjj <  800) typeSelAux1 = 0;
+    else if(mjj < 1200) typeSelAux1 = 1;
+    else if(mjj < 1800) typeSelAux1 = 2;
     else                typeSelAux1 = 3;
   
     int typeSelAux2 = -1;
@@ -1598,30 +1599,81 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     }
   }
   else if(var == 12){ // VBS WZ SR MVA based (2D)
-    float bdtNew = std::min(std::max(bdt+1.0,0.001),1.999)/2.0;
+    float bdt_incNew = std::min(std::max(bdt_inc+1.0,0.001),1.999)/2.0;
     float typeSelAux3 = -1;
     if     (zepvv >= 0.25) typeSelAux3 = 0;
     else                   typeSelAux3 = 1;
 
-    return (float)(bdtNew+typeSelAux3);
+    return (float)(bdt_incNew+typeSelAux3);
   }
   else if(var == 13){ // VBS WZ SR MVA based (1D)
-    float bdtNew = std::min(std::max(bdt+1.0,0.001),1.999)/2.0;
-    return (float)(bdtNew);
+    float bdt_incNew = std::min(std::max(bdt_inc+1.0,0.001),1.999)/2.0;
+    return (float)(bdt_incNew);
   }
   else if(var == 14){ // VBS WZ SR MVA X mjj (2D)
     int typeSelAux1 = -1;
-    if     (mjj <  900) typeSelAux1 = 0;
-    else if(mjj < 1300) typeSelAux1 = 1;
-    else if(mjj < 2000) typeSelAux1 = 2;
+    if     (mjj <  800) typeSelAux1 = 0;
+    else if(mjj < 1200) typeSelAux1 = 1;
+    else if(mjj < 1800) typeSelAux1 = 2;
     else                typeSelAux1 = 3;
 
-    float bdtNew = (std::min(std::max(bdt+1.0,0.001),1.999)/2.0)+typeSelAux1;
+    float bdt_incNew = (std::min(std::max(bdt_inc+1.0,0.001),1.999)/2.0)+typeSelAux1;
 
-    return (float)(bdtNew);
+    return (float)(bdt_incNew);
   }
+
+  else if(var >=30){
+      float typeSelAux6 = -1;
+    if     (M01 < 350 ) typeSelAux6 = 0;
+    else if(M01 < 650 ) typeSelAux6 = 1;
+    else if(M01 < 850 ) typeSelAux6 = 2;
+    else if(M01 < 1050 ) typeSelAux6 = 3;
+    else               typeSelAux6 = 4;
+
+    float typeSelAux7 = -1;
+    if     (M1T < 350 ) typeSelAux7 = 0;
+    else if(M1T < 650 ) typeSelAux7 = 1;
+    else if(M1T < 850 ) typeSelAux7 = 2;
+    else if(M1T < 1050 ) typeSelAux7 = 3;
+    else               typeSelAux7 = 4;
+
+    float typeSelAux8 = -1;
+    if     (MT < 350 ) typeSelAux8 = 0;
+    else if(MT < 650 ) typeSelAux8 = 1;
+    else if(MT < 850 ) typeSelAux8 = 2;
+    else if(MT < 1050 ) typeSelAux8 = 3;
+    else               typeSelAux8 = 4;
+
+    int typeSelAux9 = -1;
+    if     (mjj <  800) typeSelAux9 = 0;
+    else if(mjj < 1200) typeSelAux9 = 1;
+    else if(mjj < 1800) typeSelAux9 = 2;
+    else                typeSelAux9 = 3;
+    
+  if(var == 30){ // VBS EFT M01
+    return (float)(typeSelAux6); ;
+  }
+  else if(var == 31){ // VBS EFT M1T
+    return (float)(typeSelAux7);
+  }
+  else if(var == 32){ // VBS EFT MT
+    return (float)(typeSelAux8);
+  }
+  else if(var == 33){ // VBS EFT mT vs mjj
+    return (float)(typeSelAux8+5*typeSelAux9);
+  }
+  else if(var == 34){ // VBS EFT  M01 vs mjj
+    return (float)(typeSelAux9+5*typeSelAux6);
+  }
+  else if(var == 35){ // VBS EFT M1T vs mjj
+    return (float)(typeSelAux9+5*typeSelAux7);
+  }
+    return 0.0;
+} 
+
   return 0.0;
 }
+
 
 
 //Rpt variable
@@ -2384,8 +2436,7 @@ float compute_ptww_weight(const Vec_f& GenDressedLepton_pt, const Vec_f& GenDres
 
 // compute category
 int compute_category(const int mc, const int typeFake, const int typeWS, const int nFake, const int nTight, const int nWS){
-  if     (nFake > nTight) return typeFake;
-  else if(nFake < nTight) {printf("IMPOSSIBLE compute_category\n"); return -1;}
+  return typeFake;
   if(nWS > 0) return typeWS;
   return mc;
 }
@@ -2699,145 +2750,230 @@ float compute_matrixWeight(const bool isData,
     return 0; // No matrix weight for mc
   }
 
-
- // double addSF[2] {1.0, 1.0};
- // if(whichAna == 1) { addSF[0] = 1.25; addSF[1] = 1.25; }
- 
- // if(mu_pt.size() != tight_mu.size() || el_pt.size() != tight_el.size()) {
- //   printf("PROBLEM in compute_matrixWeight (%zu/%zu) (%zu/%zu)!\n", mu_pt.size(), tight_mu.size(), el_pt.size(), tight_el.size());
- //   return 0;
- // }
- // if tight[i] == 1, then the lepton is tight, otherwise it is loose
-
+  // if tight[i] == 1, then the lepton is tight, otherwise it is loose/not-tight
   double sfTot = 1.0;
 
-  for(unsigned int i=0;i<mu_pt.size();i++) {
-    if(tight_mu[i] == 1) {
-          const TH2D& hcorr = histoFakeEtaPt_mu[mType];
-          const TH2D& hcorr2 = histoPromptRateEtaPt_mu[nummu];
-          double sf1 = getValFromTH2(hcorr, fabs(mu_eta[i]),mu_pt[i]);
-          double delta1 = getValFromTH2(hcorr2, fabs(mu_eta[i]),mu_pt[i]);
-          std::cout << "Tight: sf1=" << sf1 << ", delta1=" << delta1 << std::endl;
-          sfTot *= ((1 - sf1) * (1 - delta1)) / (1 - sf1 - delta1);
-    }
-    else{
+  static long long eventCounter = 0;
+  eventCounter++;
+
+  int nTightMu = 0, nLooseMu = 0;
+  int nTightEl = 0, nLooseEl = 0;
+
+  std::cout << "\n============================================================\n";
+  std::cout << "Event " << eventCounter << std::endl;
+  std::cout << "Input leptons: nMu=" << mu_pt.size()
+            << ", nEl=" << el_pt.size() << std::endl;
+
+  // -------------------------
+  // Muons
+  // -------------------------
+  for (unsigned int i = 0; i < mu_pt.size(); i++) {
+    if (tight_mu[i] == 1) {
+      nTightMu++;
+
       const TH2D& hcorr = histoFakeEtaPt_mu[mType];
       const TH2D& hcorr2 = histoPromptRateEtaPt_mu[nummu];
-      double sf2 = getValFromTH2(hcorr, fabs(mu_eta[i]),mu_pt[i]);
-      double delta2 = getValFromTH2(hcorr2, fabs(mu_eta[i]),mu_pt[i]);
-      std::cout << "Fake: sf2=" << sf2 << ", delta2=" << delta2 << std::endl;
-      sfTot *= (-sf2*(1-delta2)) / (1 - sf2 - delta2);
+      double sf1 = getValFromTH2(hcorr, fabs(mu_eta[i]), mu_pt[i]);
+      double delta1 = getValFromTH2(hcorr2, fabs(mu_eta[i]), mu_pt[i]);
+
+      // Formula unchanged
+      double thisWeight = ((1 - sf1) * (1 - delta1)) / (1 - sf1 - delta1);
+      sfTot *= thisWeight;
+
+      std::cout << "[Muon " << i << "] "
+                << "type=TIGHT"
+                << ", pt=" << mu_pt[i]
+                << ", eta=" << mu_eta[i]
+                << ", fakeRate=" << sf1
+                << ", delta=" << delta1
+                << ", particleWeight=" << thisWeight
+                << ", running_sfTot=" << sfTot
+                << std::endl;
+    }
+    else {
+      nLooseMu++;
+
+      const TH2D& hcorr = histoFakeEtaPt_mu[mType];
+      const TH2D& hcorr2 = histoPromptRateEtaPt_mu[nummu];
+      double sf2 = getValFromTH2(hcorr, fabs(mu_eta[i]), mu_pt[i]);
+      double delta2 = getValFromTH2(hcorr2, fabs(mu_eta[i]), mu_pt[i]);
+
+      // Formula unchanged
+      double thisWeight = (-sf2 * (1 - delta2)) / (1 - sf2 - delta2);
+      sfTot *= thisWeight;
+
+      std::cout << "[Muon " << i << "] "
+                << "type=LOOSE/FAKE"
+                << ", pt=" << mu_pt[i]
+                << ", eta=" << mu_eta[i]
+                << ", fakeRate=" << sf2
+                << ", delta=" << delta2
+                << ", particleWeight=" << thisWeight
+                << ", running_sfTot=" << sfTot
+                << std::endl;
     }
   }
 
-  for(unsigned int i=0;i<el_pt.size();i++) {
-    if(tight_el[i] == 1) {
-          const TH2D& hcorr = histoFakeEtaPt_el[eType];
-          const TH2D& hcorr2 = histoPromptRateEtaPt_el[numel];
-          double sf1 = getValFromTH2(hcorr, fabs(el_eta[i]),el_pt[i]);
-          double delta1 = getValFromTH2(hcorr2, fabs(el_eta[i]),el_pt[i]);
+  // -------------------------
+  // Electrons
+  // -------------------------
+  for (unsigned int i = 0; i < el_pt.size(); i++) {
+    if (tight_el[i] == 1) {
+      nTightEl++;
 
-          std::cout << "el[" << i << "] pt=" << el_pt[i]
-                  << " eta=" << el_eta[i]
-                  << " delta1=" << delta1
-                  << std::endl;
-                  
-          sfTot *= ((1 - sf1) * (1 - delta1)) / (1 - sf1 - delta1);
-    }
-    else{
       const TH2D& hcorr = histoFakeEtaPt_el[eType];
       const TH2D& hcorr2 = histoPromptRateEtaPt_el[numel];
-      double sf2 = getValFromTH2(hcorr, fabs(el_eta[i]),el_pt[i]);
-      double delta2 = getValFromTH2(hcorr2, fabs(el_eta[i]),el_pt[i]);
-      sfTot *= (-sf2*(1-delta2)) / (1 - sf2 - delta2);
+      double sf1 = getValFromTH2(hcorr, fabs(el_eta[i]), el_pt[i]);
+      double delta1 = getValFromTH2(hcorr2, fabs(el_eta[i]), el_pt[i]);
+
+      // Formula unchanged
+      double thisWeight = ((1 - sf1) * (1 - delta1)) / (1 - sf1 - delta1);
+      sfTot *= thisWeight;
+
+      // /mnt/data/functions.h
+double denom = 1.0 - sf1 - delta1;
+std::cout << "[Electron " << i << "] "
+          << "tight=" << tight_el[i]
+          << " pt=" << el_pt[i]
+          << " eta=" << el_eta[i]
+          << " f=" << sf1
+          << " delta=" << delta1
+          << " denom=" << denom
+          << std::endl;
+
+      std::cout << "[Electron " << i << "] "
+                << "type=TIGHT"
+                << ", pt=" << el_pt[i]
+                << ", eta=" << el_eta[i]
+                << ", fakeRate=" << sf1
+                << ", delta=" << delta1
+                << ", particleWeight=" << thisWeight
+                << ", running_sfTot=" << sfTot
+                << std::endl;
+    }
+    else {
+      nLooseEl++;
+
+      const TH2D& hcorr = histoFakeEtaPt_el[eType];
+      const TH2D& hcorr2 = histoPromptRateEtaPt_el[numel];
+      double sf2 = getValFromTH2(hcorr, fabs(el_eta[i]), el_pt[i]);
+      double delta2 = getValFromTH2(hcorr2, fabs(el_eta[i]), el_pt[i]);
+
+      // Formula unchanged
+      double thisWeight = (-sf2 * (1 - delta2)) / (1 - sf2 - delta2);
+      sfTot *= thisWeight;
+      
+      std::cout << "[Electron " << i << "] "
+                << "type=LOOSE/FAKE"
+                << ", pt=" << el_pt[i]
+                << ", eta=" << el_eta[i]
+                << ", fakeRate=" << sf2
+                << ", delta=" << delta2
+                << ", particleWeight=" << thisWeight
+                << ", running_sfTot=" << sfTot
+                << std::endl;
     }
   }
 
-static int count_TT = 0, count_TF = 0, count_FT = 0, count_FF = 0;
-    static float sumW_TT = 0.0, sumW_TF = 0.0, sumW_FT = 0.0, sumW_FF = 0.0;
-    static double total_sfTot = 0.0;
+  std::cout << "[Event lepton summary] "
+            << "Muons: tight=" << nTightMu << ", loose/fake=" << nLooseMu
+            << " | Electrons: tight=" << nTightEl << ", loose/fake=" << nLooseEl
+            << std::endl;
 
-    if (numel == 0 && nummu == 0) {
-        // Check for available leptons
-        if (!tight_mu.empty() || !tight_el.empty()) {
-            // Muon-Muon pairs
-        for (size_t i = 0; i < tight_mu.size(); ++i) {
-            for (size_t j = i + 1; j < tight_mu.size(); ++j) { // Avoid self-pairs and duplicates
-                int mu1_tight = tight_mu[i];
-                int mu2_tight = tight_mu[j];
-                if (mu1_tight == 1 && mu2_tight == 1) {
-                    count_TT++;
-                    sumW_TT += sfTot;
-                } else if (mu1_tight == 1 && mu2_tight == 0) {
-                    count_TF++;
-                    sumW_TF += sfTot;
-                } else if (mu1_tight == 0 && mu2_tight == 1) {
-                    count_FT++;
-                    sumW_FT += sfTot;
-                } else if (mu1_tight == 0 && mu2_tight == 0) {
-                    count_FF++;
-                    sumW_FF += sfTot;
-                }
-            }
-        }
+  static int count_TT = 0, count_TF = 0, count_FT = 0, count_FF = 0;
+  static float sumW_TT = 0.0, sumW_TF = 0.0, sumW_FT = 0.0, sumW_FF = 0.0;
+  static double total_sfTot = 0.0;
 
-        // Electron-Electron pairs
-        for (size_t i = 0; i < tight_el.size(); ++i) {
-            for (size_t j = i + 1; j < tight_el.size(); ++j) { // Avoid self-pairs and duplicates
-                int el1_tight = tight_el[i];
-                int el2_tight = tight_el[j];
-                if (el1_tight == 1 && el2_tight == 1) {
-                    count_TT++;
-                    sumW_TT += sfTot;
-                } else if (el1_tight == 1 && el2_tight == 0) {
-                    count_TF++;
-                    sumW_TF += sfTot;
-                } else if (el1_tight == 0 && el2_tight == 1) {
-                    count_FT++;
-                    sumW_FT += sfTot;
-                } else if (el1_tight == 0 && el2_tight == 0) {
-                    count_FF++;
-                    sumW_FF += sfTot;
-                }
-            }
-        }
+  if (numel == 0 && nummu == 0) {
+    // Check for available leptons
+    if (!tight_mu.empty() || !tight_el.empty()) {
 
-        // Muon-Electron pairs
-        for (size_t i = 0; i < tight_mu.size(); ++i) {
-            for (size_t j = 0; j < tight_el.size(); ++j) {
-                int mu_tight = tight_mu[i];
-                int el_tight = tight_el[j];
-                if (mu_tight == 1 && el_tight == 1) {
-                    count_TT++;
-                    sumW_TT += sfTot;
-                } else if (mu_tight == 1 && el_tight == 0) {
-                    count_TF++;
-                    sumW_TF += sfTot;
-                } else if (mu_tight == 0 && el_tight == 1) {
-                    count_FT++;
-                    sumW_FT += sfTot;
-                } else if (mu_tight == 0 && el_tight == 0) {
-                    count_FF++;
-                    sumW_FF += sfTot;
-                }
-            }
+      // Muon-Muon pairs
+      for (size_t i = 0; i < tight_mu.size(); ++i) {
+        for (size_t j = i + 1; j < tight_mu.size(); ++j) { // Avoid self-pairs and duplicates
+          int mu1_tight = tight_mu[i];
+          int mu2_tight = tight_mu[j];
+
+          if (mu1_tight == 1 && mu2_tight == 1) {
+            count_TT++;
+            sumW_TT += sfTot;
+          } else if (mu1_tight == 1 && mu2_tight == 0) {
+            count_TF++;
+            sumW_TF += sfTot;
+          } else if (mu1_tight == 0 && mu2_tight == 1) {
+            count_FT++;
+            sumW_FT += sfTot;
+          } else if (mu1_tight == 0 && mu2_tight == 0) {
+            count_FF++;
+            sumW_FF += sfTot;
+          }
         }
+      }
+
+      // Electron-Electron pairs
+      for (size_t i = 0; i < tight_el.size(); ++i) {
+        for (size_t j = i + 1; j < tight_el.size(); ++j) { // Avoid self-pairs and duplicates
+          int el1_tight = tight_el[i];
+          int el2_tight = tight_el[j];
+
+          if (el1_tight == 1 && el2_tight == 1) {
+            count_TT++;
+            sumW_TT += sfTot;
+          } else if (el1_tight == 1 && el2_tight == 0) {
+            count_TF++;
+            sumW_TF += sfTot;
+          } else if (el1_tight == 0 && el2_tight == 1) {
+            count_FT++;
+            sumW_FT += sfTot;
+          } else if (el1_tight == 0 && el2_tight == 0) {
+            count_FF++;
+            sumW_FF += sfTot;
+          }
+        }
+      }
+
+      // Muon-Electron pairs
+      for (size_t i = 0; i < tight_mu.size(); ++i) {
+        for (size_t j = 0; j < tight_el.size(); ++j) {
+          int mu_tight = tight_mu[i];
+          int el_tight = tight_el[j];
+
+          if (mu_tight == 1 && el_tight == 1) {
+            count_TT++;
+            sumW_TT += sfTot;
+          } else if (mu_tight == 1 && el_tight == 0) {
+            count_TF++;
+            sumW_TF += sfTot;
+          } else if (mu_tight == 0 && el_tight == 1) {
+            count_FT++;
+            sumW_FT += sfTot;
+          } else if (mu_tight == 0 && el_tight == 0) {
+            count_FF++;
+            sumW_FF += sfTot;
+          }
+        }
+      }
     }
-    total_sfTot += sfTot;
-  
-    std::cout << "[Counts & Weights] "
-              << "TT: " << count_TT << " (sumW=" << sumW_TT << "), "
-              << "TF: " << count_TF << " (sumW=" << sumW_TF << "), "
-              << "FT: " << count_FT << " (sumW=" << sumW_FT << "), "
-              << "FF: " << count_FF << " (sumW=" << sumW_FF << ")"
-              << std::endl;
-             
-              
-    std::cout << "Total sfTot: " << total_sfTot << std::endl;
   }
+
+  total_sfTot += sfTot;
+
+  std::cout << "[Event result] "
+            << "sfTot=" << sfTot
+            << ", running total sfTot=" << total_sfTot
+            << std::endl;
+
+  std::cout << "[Counts & Weights] "
+            << "TT: " << count_TT << " (sumW=" << sumW_TT << "), "
+            << "TF: " << count_TF << " (sumW=" << sumW_TF << "), "
+            << "FT: " << count_FT << " (sumW=" << sumW_FT << "), "
+            << "FF: " << count_FF << " (sumW=" << sumW_FF << ")"
+            << std::endl;
+
+  std::cout << "============================================================\n";
 
   return sfTot;
-      }
+}
 
 
 //////////////////////////////////////////////////////////////////

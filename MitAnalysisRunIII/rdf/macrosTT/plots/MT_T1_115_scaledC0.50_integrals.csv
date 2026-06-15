@@ -1,0 +1,7 @@
+operator,cValue,coefficient,scaledCoeff,plotNumber,year,intHistoNumber,quadHistoNumber,SM,INT,QUAD,TOTAL,inputFile
+T1,2,1,0.5,115,20220,36,37,12.95405819,-0.3788668865,1.053996628,13.62918793,/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/0000/merge1/fillhisto_sswwAnalysis1001_20220_115.root
+T1,2,1,0.5,115,20221,36,37,38.05663893,-1.126013975,3.180070206,40.11069516,/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/0000/merge1/fillhisto_sswwAnalysis1001_20221_115.root
+T1,2,1,0.5,115,20230,36,37,27.64657931,-0.7783245409,2.096695853,28.96495062,/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/0000/merge1/fillhisto_sswwAnalysis1001_20230_115.root
+T1,2,1,0.5,115,20231,36,37,14.97093789,-0.4301834068,1.194346785,15.73510127,/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/0000/merge1/fillhisto_sswwAnalysis1001_20231_115.root
+T1,2,1,0.5,115,20240,36,37,171.2186984,-3.981664688,11.27616638,178.5132001,/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/0000/merge1/fillhisto_sswwAnalysis1001_20240_115.root
+T1,2,1,0.5,115,20250,36,37,154.0985201,-3.585381324,10.28486994,160.7980087,/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/0000/merge1/fillhisto_sswwAnalysis1001_20250_115.root

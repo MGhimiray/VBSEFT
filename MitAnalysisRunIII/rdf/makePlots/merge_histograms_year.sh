@@ -9,7 +9,7 @@ theAna=$1;
 theCondor=$2;
 theYear=$3;
 group=9
-outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1000/merge2/"
+outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1000/merge3/"
 mkdir -p "$outdir"
 
 if [ ${theYear} = 2027 ]; then

@@ -7,7 +7,7 @@ set -uo pipefail
 
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
-cutoff=1200
+cutoff=0000
 
 outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/${whichana}/${cutoff}/histo/fillhisto_sswwAnalysis"
 
@@ -63,7 +63,7 @@ get_max_seen_job() {
   # Collect matches safely
   shopt -s nullglob
   local -a arr
-  arr=( "$outdir"/fillhisto_sswwAnalysis1001_sample"${sample}"_year"${tag}"_job*.root )
+  arr=( "$outdir"/fillhisto_sswwAnalysis"${whichana}"_sample"${sample}"_year"${tag}"_job*.root )
 #  arr=( "$outdir"/fillhisto_sswwAnalysis"${whichana}"_sample"${sample}"_year"${tag}"_job*.root )
   shopt -u nullglob
 
@@ -89,7 +89,7 @@ total_found=0
 for tag in "${tags[@]}"; do
   for sample in ${samples[$tag]}; do
     for job in $jobs_list; do
-      f="$outdir/fillhisto_sswwAnalysis1001_sample${sample}_year${tag}_job${job}.root"
+      f="$outdir/fillhisto_sswwAnalysis${whichana}_sample${sample}_year${tag}_job${job}.root"
       (( total_expected++ ))
       if [[ -s "$f" ]]; then
         (( total_found++ ))
@@ -144,8 +144,8 @@ if ((${#missing_detail[@]})); then
              --job-name="vbsoriginalTT_${tag}_${sample}_${job}" \
              --output="log/vbs__${tag}_${sample}_${job}.out" \
              --error="log/vbs__${tag}_${sample}_${job}.err" \
-             submit_cis_analysis.sh "$tag" "$sample" "$job" \
-        || echo "  (warn) submit failed for $tag $sample $job"
+             submit_cis_analysis.sh "$tag" "$sample" "$job" "$cutoff"\
+        || echo "  (warn) submit failed for $tag $sample $job $cutoff"
     fi
   done < <(printf "%s\n" "${missing_detail[@]}")
 

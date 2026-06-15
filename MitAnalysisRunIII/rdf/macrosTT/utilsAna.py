@@ -1437,7 +1437,7 @@ def SwitchSample(argument, skimType):
        694: (dirT2+"2024/"+skimType+"/VBS-SSWW-M0-Quadratic_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", 0.007333*1000,plotCategory("kPlotEFTM0Quad")),
        695: (dirT3+"Sherpa_Sample/2024", 39.8961,plotCategory("kPlotEWKSSWW")),
        696: (dirT2+"2024/"+skimType+"/VBS-SSWW-M1-Interference_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", -0.0003746 *1000,plotCategory("kPlotEFTM1Int")),
-       697: (dirT2+"2024/"+skimType+"/VBS-SSWW-M1-Quadratic_TuneCP5_13p6TeV-madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", 0.007688*1000,plotCategory("kPlotEFTM1Quad")),
+       697: (dirT2+"2024/"+skimType+"/VBS-SSWW-M1-Quadratic_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", 0.007688*1000,plotCategory("kPlotEFTM1Quad")),
        698: (dirT2+"2024/"+skimType+"/VBS-SSWW-M7-Interference_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", 0.00002167*1000,plotCategory("kPlotEFTM7Int")),
        699: (dirT2+"2024/"+skimType+"/VBS-SSWW-M7-Quadratic_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", 0.003405*1000,plotCategory("kPlotEFTM7Quad")),
        6990: (dirT2+"2024/"+skimType+"/VBS-SSWW-S0-Interference_TuneCP5_13p6TeV_madgraph-pythia8+RunIII2024Summer24NanoAODv15-150X_mcRun3_2024_realistic_v2-v2+NANOAODSIM", -0.0003575*1000,plotCategory("kPlotEFTS0Int")),

@@ -60,7 +60,7 @@ esac
 get_max_seen_job() {
   local tag="$1" sample="$2"
   shopt -s nullglob
-  local arr=( "$outdir"/fillhisto_sswwAnalysis1001_sample"${sample}"_year"${tag}"_job*.root )
+  local arr=( "$outdir"/fillhisto_sswwAnalysis"${whichana}"_sample"${sample}"_year"${tag}"_job*.root )
   shopt -u nullglob
   local max=-1 f
   for f in "${arr[@]}"; do
@@ -80,7 +80,7 @@ total_found=0
 for tag in "${tags[@]}"; do
   for sample in ${samples[$tag]}; do
     for job in $jobs_list; do
-      f="$outdir/fillhisto_sswwAnalysis1001_sample${sample}_year${tag}_job${job}.root"
+      f="$outdir/fillhisto_sswwAnalysis${whichana}_sample${sample}_year${tag}_job${job}.root"
       (( total_expected++ ))
       if [[ -s "$f" ]]; then
         (( total_found++ ))
@@ -134,8 +134,8 @@ if ((${#missing_detail[@]})); then
              --job-name="vbsmatrixmethod_${year}_${sample}_${job}" \
              --output="log/vbs__${year}_${sample}_${job}.out" \
              --error="log/vbs__${year}_${sample}_${job}.err" \
-             submit_cis_analysis.sh "$tag" "$sample" "$job" \
-        || echo "  (warn) submit failed for $tag $sample $job"
+             submit_cis_analysis.sh "$tag" "$sample" "$job" "$cutoff"\
+        || echo "  (warn) submit failed for $tag $sample $job $cutoff"
     fi
   done < <(printf "%s\n" "${missing_detail[@]}")
 

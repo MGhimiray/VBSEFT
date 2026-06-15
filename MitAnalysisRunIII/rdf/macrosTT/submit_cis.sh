@@ -20,7 +20,7 @@ elif [ "$whichyear" = "2025" ]; then
     which_job="0 1 2 3 4 5 6 7 8 9"
 fi
 
-cutoff="1200"
+cutoff="0000"
 # Iterate over each year
 for year in "${!year_process_map[@]}"; do
     echo "Year: $year"
@@ -32,9 +32,9 @@ for year in "${!year_process_map[@]}"; do
     for process in $processes; do
         for cut in $cutoff; do
         for jobs in $which_job; do
-        echo "Submitting: Year=$year, Process=$process", "Job=$jobs"
+        echo "Submitting: Year=$year, Process=$process", "Job=$jobs", "Cutoff=$cut"
         sbatch -p INTEL_HASWELL --time=70:00:00 --cpus-per-task=1 --nodes=1 \
-               --job-name="vbsTT_${year}_${process}_${jobs}" \
+               --job-name="${process}vbsTT_${year}_${process}_${jobs}" \
                --output="log/vbs__${year}_${process}_${jobs}.out" \
                --error="log/vbs__${year}_${process}_${jobs}.err" \
                submit_cis_analysis.sh "$year" "$process" "$jobs" "$cut"

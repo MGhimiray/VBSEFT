@@ -14,6 +14,7 @@ fi
 
 export YEAR=$1
 
+folder="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/Fakerate/output/merge1"
 # standard eta - pt
 rm -f histoFakeEtaPt_fakeAnalysis100?_${YEAR}_anaType?.root;
 

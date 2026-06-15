@@ -12,9 +12,9 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
 if __name__ == "__main__":
-    path = "fillhisto_fakeAnalysis1001"
+    path = "fillhisto_fakeAnalysis"
     year = 2022
-    inputDir = "anaZ"
+    inputDir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/Fakerate/output/merge1"
     anaType = 0
     format = "pdf"
     isPseudoData = 0

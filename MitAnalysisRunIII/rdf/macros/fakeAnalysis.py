@@ -88,7 +88,7 @@ def selection1L(df,year,PDType,isData,TRIGGERFAKEMU,TRIGGERFAKEEL,count):
 
     return dftag
 
-def analysis(df,count,category,weight,year,PDType,isData,whichJob,puWeights):
+def analysis(df,count,category,weight,year,PDType,isData,whichJob,puWeights,whichsample):
 
     print("starting {0} / {1} / {2} / {3} / {4} / {5} / {6}".format(count,category,weight,year,PDType,isData,whichJob))
 
@@ -224,7 +224,8 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,puWeights):
                 if(ltype == 1):
                     histo[npt+totalxPtDistBins*ltype+120][y] = dfptcat[(2*y+ltype)*totalxPtDistBins+npt].Filter("Sum(tight_el3)==1").Histo1D(("histo_{0}_{1}".format(npt+totalxPtDistBins*ltype+120,y), "histo_{0}_{1}".format(npt+totalxPtDistBins*ltype+120,y),40, 0, 200), "mtfix","weight")
 
-            dffakecat.append(dfcat[2*y+ltype].Filter("mtfix < {0} && ptl < {1}".format(mtfixCut,xPtBins[len(xPtBins)-1]), "mtfixCut < X && ptl < Y"))
+            dffakecat.append(dfcat[2*y+ltype].Filter("ptl < {0}".format(xPtBins[len(xPtBins)-1]), "ptl < {0}".format(xPtBins[len(xPtBins)-1])))
+            dffakecat[2*y+ltype] = dffakecat[2*y+ltype].Filter("mtfix < {0}".format(mtfixCut), "mtfix < {0}".format(mtfixCut))
 
             dfjet30cat .append(dffakecat[2*y+ltype].Filter("ngood_jets > 0","at least one jet30").Define("drljet","deltaR(good_Jet_eta[0],good_Jet_phi[0],etal,phil)"))
             dfjet50cat .append(dffakecat[2*y+ltype].Filter("nvbs_jets > 0","at least one jet50").Define("drljet","deltaR(vbs_Jet_eta[0],vbs_Jet_phi[0],etal,phil)"))
@@ -306,7 +307,7 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,puWeights):
             print("---------------- SUMMARY 2*{0}+{1} = {2} -------------".format(y,ltype,2*y+ltype))
             report[2*y+ltype].Print()
 
-    myfile = ROOT.TFile("fillhisto_fakeAnalysis_sample{0}_year{1}_job{2}.root".format(count,year,whichJob),'RECREATE')
+    myfile = ROOT.TFile("/mnt/home/mghimiray/VBSStudies/Outputs_EFT/Fakerate/output/fillhisto_fakeAnalysis{3}_sample{0}_year{1}_job{2}.root".format(count,year,whichJob,whichsample),'RECREATE')
     for i in range(nCat):
         for j in range(nHisto):
             if(histo[j][i] == 0): continue
@@ -318,7 +319,7 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,puWeights):
             histo2D[j][i].Write()
     myfile.Close()
 
-def readMCSample(sampleNOW, year, skimType, whichJob, group, puWeights):
+def readMCSample(sampleNOW, year, skimType, whichJob, group, puWeights, whichsample):
 
     files = getMClist(sampleNOW, skimType)
     print("Total files: {0}".format(len(files)))
@@ -347,9 +348,9 @@ def readMCSample(sampleNOW, year, skimType, whichJob, group, puWeights):
 
     PDType = os.path.basename(SwitchSample(sampleNOW, skimType)[0]).split('+')[0]
 
-    analysis(df, sampleNOW, SwitchSample(sampleNOW, skimType)[2], weight, year, PDType, "false", whichJob, puWeights)
+    analysis(df, sampleNOW, SwitchSample(sampleNOW, skimType)[2], weight, year, PDType, "false", whichJob, puWeights, whichsample)
 
-def readDASample(sampleNOW, year, skimType, whichJob, group, puWeights):
+def readDASample(sampleNOW, year, skimType, whichJob, group, puWeights, whichsample):
 
     PDType = "0"
     if  (sampleNOW >= 1000 and sampleNOW <= 1009): PDType = "SingleMuon"
@@ -376,7 +377,7 @@ def readDASample(sampleNOW, year, skimType, whichJob, group, puWeights):
     nevents = df.Count().GetValue()
     print("%s entries in the dataset" %nevents)
 
-    analysis(df, sampleNOW, sampleNOW, weight, year, PDType, "true", whichJob, puWeights)
+    analysis(df, sampleNOW, sampleNOW, weight, year, PDType, "true", whichJob, puWeights, whichsample)
 
 if __name__ == "__main__":
 
@@ -386,11 +387,13 @@ if __name__ == "__main__":
     year = 2022
     process = -1
     whichJob = -1
+    whichsample=1001
 
-    valid = ['year=', "process=", 'whichJob=', 'help']
+    valid = ['year=', "process=", 'whichJob=', 'whichsample=', 'help']
     usage  =  "Usage: ana.py --year=<{0}>\n".format(year)
     usage +=  "              --process=<{0}>\n".format(process)
     usage +=  "              --whichJob=<{0}>".format(whichJob)
+    usage +=  "              --whichsample=<{0}>".format(whichsample)
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", valid)
     except getopt.GetoptError as ex:
@@ -417,8 +420,8 @@ if __name__ == "__main__":
 
     try:
         if(process >= 0 and process < 1000):
-            readMCSample(process,year,skimType,whichJob,group, puWeights)
+            readMCSample(process,year,skimType,whichJob,group, puWeights, whichsample)
         elif(process >= 1000):
-            readDASample(process,year,skimType,whichJob,group, puWeights)
+            readDASample(process,year,skimType,whichJob,group, puWeights, whichsample)
     except Exception as e:
         print("FAILED {0}".format(e))

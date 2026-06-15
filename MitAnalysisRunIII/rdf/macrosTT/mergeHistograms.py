@@ -5,13 +5,13 @@ from utilsCategory import plotCategory
 ROOT.PyConfig.DisableRootLogon = True
 
 if __name__ == "__main__":
-    dir = "1001"
-    cutoffs = ["3000"]
+    dir = "1012"
+    cutoffs = ["1000"]
     year = "20220, 20221, 20230, 20231, 20240, 20250"
     for cut in cutoffs:
         base = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/{cut}/histo/fillhisto_sswwAnalysis"
         path = "fillhisto_sswwAnalysis"
-        year = 20220
+        year = 20230
         output = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/{cut}/merge1"
         mkdir = output
         if not os.path.exists(mkdir):
@@ -41,7 +41,7 @@ if __name__ == "__main__":
             if opt == "--output":
                 output = str(arg)
     
-        paths_to_watch = "{0}/{1}1001_sample*_year{2}_job*.root".format(base, path, year)
+        paths_to_watch = "{0}/{1}{2}_sample*_year{3}_job*.root".format(base, path, dir, year)
         print("paths_to_watch: {0}".format(paths_to_watch))
         inputDataFolders = glob.glob(paths_to_watch)
         print("Total found files: {0}".format(len(inputDataFolders)))

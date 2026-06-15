@@ -67,7 +67,7 @@
 	{
 	    "name": "FAKE_EL",
 	    "version": 12,
-	    "definition": "(abs(Electron_dxy) < 0.05 && abs(Electron_dz) < 0.10 && abs(Electron_eta) < 2.5 && Electron_pt > 10 && Electron_cutBased >= 2 && Electron_jetRelIso < 0.5)"
+	    "definition": "(abs(Electron_dxy) < 0.05 && abs(Electron_dz) < 0.10 && abs(Electron_eta) < 2.5 && Electron_pt > 10 && Electron_cutBased >= 1 && Electron_jetRelIso < 0.5)"
 	},
 	{
 	    "name": "TIGHT_FAKE_EL",
