@@ -18,9 +18,9 @@ def get_available_histo_indices(root_file):
 
 
 if __name__ == "__main__":
-    path = "fillhisto_sswwAnalysis1012"
+    path = "fillhisto_sswwAnalysis1014"
     year = 20220
-    output = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1012/1000/merge1"
+    output = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1014/0000/merge1"
     showUnc = 0
 
     valid = ['path=', 'year=', 'output=', 'unc=', 'help']

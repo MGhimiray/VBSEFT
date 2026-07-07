@@ -1686,16 +1686,34 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     return (float)(typeSelAux8+5*typeSelAux9);
   }
   else if(var == 34){ // VBS EFT  M01 vs mjj
-    return (float)(typeSelAux9+5*typeSelAux6);
+    return (float)(typeSelAux6+5*typeSelAux9);
   }
   else if(var == 35){ // VBS EFT M1T vs mjj
-    return (float)(typeSelAux9+5*typeSelAux7);
+    return (float)(typeSelAux7+5*typeSelAux9);
   }
     return 0.0;
 } 
 
   return 0.0;
 }
+
+//Rpt variable
+    float GetRpt(const Vec_f& pt, const Vec_f& mu_pt, const Vec_f& el_pt) {
+    float r = 0;
+    float ptl1 = 0;
+    float ptl2 = 0;
+    if(mu_pt.size() == 2){
+      ptl1 = mu_pt[0]; ptl2 = mu_pt[1];
+    }
+    if(el_pt.size() == 2){
+      ptl1 = el_pt[0]; ptl2 = el_pt[1];
+    }
+    if(el_pt.size() == 1 && mu_pt.size() == 1){
+      ptl1 = mu_pt[0]; ptl2 = el_pt[0]; 
+    }
+    float rpt = (ptl1*ptl2)/(pt[0]*pt[1]);
+    return log(rpt);
+  }
 
 
 
@@ -1760,7 +1778,7 @@ float compute_jet_lepton_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass,
   else if(var == 5) theVar = fabs(p4momVV.Eta()-p1.Eta());
   else if(var == 6) theVar = fabs(p4momVV.Eta()-p2.Eta());
   else if(var == 7) theVar = (p4momVV.Pt()-(p1+p2).Pt())/(p1+p2).Pt();
-  else if(var == 8) theVar = deltaPhi(p4momJJ.Phi(), p4momLL.Phi());
+  else if(var == 8) theVar = GetRpt(pt, mu_pt, el_pt);
   return theVar;
 }
 

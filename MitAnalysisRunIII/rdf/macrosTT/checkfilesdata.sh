@@ -7,7 +7,7 @@ set -uo pipefail
 
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
-cutoff=1200
+cutoff=0000
 
 # Verify the capitalization ("matrix_method" vs "Matrix_method") matches your FS.
 outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${whichana}/${cutoff}/histo/fillhisto_sswwAnalysis"
