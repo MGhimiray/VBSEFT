@@ -16,10 +16,10 @@ years=$1
 processes=$2
 which_job=$3
 cutoff=$4
-
+makedatacards=$5
 
 # Run the Python script with input file and output directory as arguments
-python3 sswwAnalysis.py --year="$years" --process="$processes" --whichJob="$which_job" --cutOff="$cutoff"
+python3 sswwAnalysis.py --year="$years" --process="$processes" --whichJob="$which_job" --cutOff="$cutoff" --makeDataCards="$makedatacards"
 #python3 wzAnalysis.py --year="$years" --process="$processes" --whichJob="$which_job" --cutoff="$cutOff"
 #python3 sswwAnalysis.py --year=20220 --process=1022 --whichJob=0
 #python3 sswwAnalysis.py --year=20220 --process=100 --whichJob=0

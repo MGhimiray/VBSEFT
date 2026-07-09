@@ -3,6 +3,9 @@
 # Define mapping between years and corresponding processes
 # to run ./submit_cis.sh year (year = 2022/2023/2024)
 whichyear=$1
+variable=$2
+makeDataCards=$((variable - 1000))
+
 if [ "$whichyear" = "2023" ]; then
     declare -A year_process_map
     year_process_map["20230"]="1022 1032 1042"
@@ -34,10 +37,10 @@ for year in "${!year_process_map[@]}"; do
         for jobs in $which_job; do
         echo "Submitting: Year=$year, Process=$process", "Job=$jobs", "Cutoff=$cutoff"
         sbatch -p INTEL_HASWELL --time=70:00:00 --cpus-per-task=1 --nodes=1 \
-               --job-name="${process}vbsmatrixmethod_${year}_${process}_${jobs}" \
+               --job-name="${variable}${process}vbsmatrixmethod_${year}_${process}_${jobs}" \
                --output="log/vbs__${year}_${process}_${jobs}.out" \
                --error="log/vbs__${year}_${process}_${jobs}.err" \
-               submit_cis_analysis.sh "$year" "$process" "$jobs" "$cutoff"
+               submit_cis_analysis.sh "$year" "$process" "$jobs" "$cutoff" "$makedataCards"
     done
 done
 done

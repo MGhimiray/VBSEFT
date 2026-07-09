@@ -1622,20 +1622,29 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     return (float)(bdt_incNew);
   }
 
+
   else if(var >=30){
       float typeSelAux6 = -1;
-    if     (M01 < 350 ) typeSelAux6 = 0;
-    else if(M01 < 650 ) typeSelAux6 = 1;
-    else if(M01 < 850 ) typeSelAux6 = 2;
-    else if(M01 < 1050 ) typeSelAux6 = 3;
-    else               typeSelAux6 = 4;
+    if     (M01 < 500 ) typeSelAux6 = 0;
+    else if(M01 < 700 ) typeSelAux6 = 1;
+    else if(M01 < 1000) typeSelAux6 = 2;
+    else if(M01 < 1100) typeSelAux6 = 3;
+    else if(M01 < 1200) typeSelAux6 = 4;
+    else if(M01 < 1300) typeSelAux6 = 5;
+    else if(M01 < 1400) typeSelAux6 = 6;
+    else if(M01 < 1500) typeSelAux6 = 7;
+    else                typeSelAux6 = 8;
 
     float typeSelAux7 = -1;
-    if     (M1T < 350 ) typeSelAux7 = 0;
-    else if(M1T < 650 ) typeSelAux7 = 1;
-    else if(M1T < 850 ) typeSelAux7 = 2;
-    else if(M1T < 1050 ) typeSelAux7 = 3;
-    else               typeSelAux7 = 4;
+    if     (M1T < 500 ) typeSelAux7 = 0;
+    else if(M1T < 700 ) typeSelAux7 = 1;
+    else if(M1T < 1000 ) typeSelAux7 = 2;
+    else if(M1T < 1100 ) typeSelAux7 = 3;
+    else if(M1T < 1200 ) typeSelAux7 = 4;
+    else if(M1T < 1300 ) typeSelAux7 = 5;
+    else if(M1T < 1400 ) typeSelAux7 = 6;
+    else if(M1T < 1500 ) typeSelAux7 = 7;
+    else                typeSelAux7 = 8;
 
     float typeSelAux8 = -1;
     if     (MT < 350 ) typeSelAux8 = 0;
@@ -1663,10 +1672,10 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     return (float)(typeSelAux8+5*typeSelAux9);
   }
   else if(var == 34){ // VBS EFT  M01 vs mjj
-    return (float)(typeSelAux9+5*typeSelAux6);
+    return (float)(typeSelAux6+8*typeSelAux9);
   }
   else if(var == 35){ // VBS EFT M1T vs mjj
-    return (float)(typeSelAux9+5*typeSelAux7);
+    return (float)(typeSelAux7+8*typeSelAux9);
   }
     return 0.0;
 } 

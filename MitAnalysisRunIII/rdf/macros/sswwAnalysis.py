@@ -1,7 +1,7 @@
 import ROOT
 import os, sys, getopt, json
 
-ROOT.ROOT.EnableImplicitMT(10)
+ROOT.ROOT.EnableImplicitMT(1)
 from utilsCategory import plotCategory
 from utilsAna import getMClist, getDATAlist
 from utilsAna import SwitchSample, groupFiles, getTriggerFromJson, getLeptomSelFromJson, getLumi
@@ -11,50 +11,49 @@ from array import array
 
 
 correctionString = "_correction"
-makeDataCards = 13 # 1 (mjj diff), 2 (mll diff), 3 (njets diff), 4 (detajj diff), 5 (dphijj diff), 6 (mjj), 7 (mll), 8 (detajj), 9 (dphijj), 10 (M01), 11 (M1T), 12(MT), 13 (MT vs mjj), 14 (M01 vs mjj), 15 (M1T vs mjj)
-genVBSSel = makeDataCards
-if(genVBSSel == 7):
-    genVBSSel = 1
-elif(genVBSSel == 7):
-    genVBSSel = 2
-elif(genVBSSel == 8):
-    genVBSSel = 4
-elif(genVBSSel == 9):
-    genVBSSel = 5
+# makeDataCards = 10 # 1 (mjj diff), 2 (mll diff), 3 (njets diff), 4 (detajj diff), 5 (dphijj diff), 6 (mjj), 7 (mll), 8 (detajj), 9 (dphijj), 10 (M01), 11 (M1T), 12(MT), 13 (MT vs mjj), 14 (M01 vs mjj), 15 (M1T vs mjj)
+#genVBSSel = makeDataCards
+#if(genVBSSel == 7):
+#    genVBSSel = 1
+#elif(genVBSSel == 7):
+#    genVBSSel = 2
+#elif(genVBSSel == 8):
+#   genVBSSel = 4
+#elif(genVBSSel == 9):
+#    genVBSSel = 5
 
-if makeDataCards == 0:
-    dirT2 = "1000"
-if makeDataCards == 1:
-    dirT2 = "1001"
-if makeDataCards == 2:
-    dirT2 = "1002"
-if makeDataCards == 3:
-    dirT2 = "1003"
-if makeDataCards == 4:
-    dirT2 = "1004"
-if makeDataCards == 5:
-    dirT2 = "1005"
-if makeDataCards == 6:
-    dirT2 = "1006"
-if makeDataCards == 7:
-    dirT2 = "1007"
-if makeDataCards == 8:
-    dirT2 = "1008"
-if makeDataCards == 9:
-    dirT2 = "1009"
-if makeDataCards == 10:
-    dirT2 = "1010"
-if makeDataCards == 11:
-    dirT2 = "1011"
-if makeDataCards == 12:
-    dirT2 = "1012"
-if makeDataCards == 13:
-    dirT2 = "1013"
-if makeDataCards == 14:
-    dirT2 = "1014"
-if makeDataCards == 15:
-    dirT2 = "1015"
-
+#if makeDataCards == 0:
+#    dirT2 = "1000"
+#if makeDataCards == 1:
+#    dirT2 = "1001"
+#if makeDataCards == 2:
+#    dirT2 = "1002"
+#if makeDataCards == 3:
+#    dirT2 = "1003"
+#if makeDataCards == 4:
+#    dirT2 = "1004"
+#if makeDataCards == 5:
+#    dirT2 = "1005"
+#if makeDataCards == 6:
+#    dirT2 = "1006"
+#if makeDataCards == 7:
+#    dirT2 = "1007"
+#if makeDataCards == 8:
+#    dirT2 = "1008"
+#if makeDataCards == 9:
+#    dirT2 = "1009"
+#if makeDataCards == 10:
+#    dirT2 = "1010"
+#if makeDataCards == 11:
+#    dirT2 = "1011"
+#if makeDataCards == 12:
+#    dirT2 = "1012"
+#if makeDataCards == 13:
+#    dirT2 = "1013"
+#if makeDataCards == 14:
+#    dirT2 = "1014"
+#if makeDataCards == 15:
+#    dirT2 = "1015"
 
 
 doNtuples = True
@@ -832,8 +831,19 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 BinXF1 = 8
                 minXF1 = -0.5
                 maxXF1 =  7.5
+            elif(makeDataCards == 10 or makeDataCards == 11):
+                BinXF1 = 8
+                minXF1 = -0.5
+                maxXF1 =  7.5
+            elif(makeDataCards == 12):
+                BinXF1 = 4
+                minXF1 = -0.5
+                maxXF1 =  3.5
+            elif(makeDataCards == 13 or makeDataCards == 14 or makeDataCards == 15):
+                BinXF1 = 32
+                minXF1 = -0.5
+                maxXF1 =  31.5
             histo[110][x] = dfwwvbscat[x] .Histo1D(("histo_{0}_{1}".format(110,x), "histo_{0}_{1}".format(110,x),BinXF1,minXF1,maxXF1), "finalVar","weight")
-
             BinXF2 = 4
             minXF2 = -0.5
             maxXF2 =  3.5
@@ -1220,13 +1230,15 @@ if __name__ == "__main__":
     year = 2022
     process = -1
     whichJob = -1
-    cutOff=1200
+    cutOff=1500
+    makeDataCards = 1
 
     valid = ['year=', "process=", 'whichJob=', 'cutOff=', 'help']
     usage  =  "Usage: ana.py --year=<{0}>\n".format(year)
     usage +=  "              --process=<{0}>\n".format(process)
     usage +=  "              --whichJob=<{0}>\n".format(whichJob)
     usage +=  "              --cutOff=<{0}>".format(cutOff)
+    usage +=  "              --makedataCards=<{0}>".format(makeDataCards)
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", valid)
     except getopt.GetoptError as ex:
@@ -1245,7 +1257,22 @@ if __name__ == "__main__":
         if opt == "--whichJob":
             whichJob = int(arg)
         if opt == "--cutOff":
-            cutOff = int(arg)
+            cutOff = str(arg).zfill(4)
+        if opt == "--makeDataCards":
+            makeDataCards = int(arg)
+
+    genVBSSel = makeDataCards
+
+    if genVBSSel == 6:
+        genVBSSel = 1
+    elif genVBSSel == 7:
+        genVBSSel = 2
+    elif genVBSSel == 8:
+        genVBSSel = 4
+    elif genVBSSel == 9:
+        genVBSSel = 5
+    
+    dirT2 = "{0}".format(1000 + makeDataCards)
 
 # Electroweak corrections
     ewkCorrWeights = []
