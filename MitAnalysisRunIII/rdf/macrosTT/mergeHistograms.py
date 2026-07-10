@@ -5,8 +5,8 @@ from utilsCategory import plotCategory
 ROOT.PyConfig.DisableRootLogon = True
 
 if __name__ == "__main__":
-    dir = "1014"
-    cutoffs = ["0000"]
+    dir = "1013"
+    cutoffs = ["3000"]
     year = "20220"
     for cut in cutoffs:
         base = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/{cut}/histo/fillhisto_sswwAnalysis"

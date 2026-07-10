@@ -3,18 +3,18 @@ set -uo pipefail
 
 year="${1:?Usage: $0 <2022|2023|2024>}"
 command -v hadd >/dev/null || { echo "ERROR: hadd not found in PATH"; exit 1; }
-
+# ./hadd.sh 2022 1014
 
 
 # for dir in {1001..1009}; do
-for dir in 1012; do
-  for cutoff in 1200; do
+for dir in 1014; do
+  for cutoff in 0000; do
     echo "Processing directory $dir with cutoff $cutoff for year $year"
   inputdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${dir}/${cutoff}/histo/fillhisto_sswwAnalysis"
   outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/${dir}/${cutoff}/histo/fillhisto_sswwAnalysis"
   mkdir -p "$outdir"
 
-  for i in {0..9}; do
+  for i in {0..14}; do
     echo "Processing job index $i for year $year"
 
     if [[ "$year" == "2023" ]]; then

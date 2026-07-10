@@ -25,7 +25,7 @@ if [[ ! -d "$outdir" ]]; then
 fi
 
 # Jobs we expect to exist (0..9)
-jobs_list=$(seq 0 9)
+jobs_list=$(seq 0 14)
 
 # Map of <yearTag> -> <samples>
 declare -A samples

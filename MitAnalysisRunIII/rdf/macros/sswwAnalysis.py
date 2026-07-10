@@ -1224,7 +1224,7 @@ def readDASample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights
 
 if __name__ == "__main__":
 
-    group = 10
+    group = 15
 
     skimType = "2l"
     year = 2022
@@ -1233,12 +1233,12 @@ if __name__ == "__main__":
     cutOff=1500
     makeDataCards = 1
 
-    valid = ['year=', "process=", 'whichJob=', 'cutOff=', 'help']
+    valid = ['year=', "process=", 'whichJob=', 'cutOff=', 'makeDataCards=', 'help']
     usage  =  "Usage: ana.py --year=<{0}>\n".format(year)
     usage +=  "              --process=<{0}>\n".format(process)
     usage +=  "              --whichJob=<{0}>\n".format(whichJob)
     usage +=  "              --cutOff=<{0}>".format(cutOff)
-    usage +=  "              --makedataCards=<{0}>".format(makeDataCards)
+    usage +=  "              --makeDataCards=<{0}>".format(makeDataCards)
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", valid)
     except getopt.GetoptError as ex:

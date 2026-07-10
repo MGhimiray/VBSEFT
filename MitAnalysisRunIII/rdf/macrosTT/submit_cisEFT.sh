@@ -1,7 +1,9 @@
 #!/bin/bash
-#./submit_cisEFT.sh 2023
+#./submit_cisEFT.sh 2023 1001
 # Define mapping between years and corresponding processes
 whichyear=$1
+variable=$2
+makedataCards=$((variable - 1000))
 if [ "$whichyear" = "2023" ]; then
     declare -A year_process_map
     year_process_map["20230"]="393 394 396 397 398 399 3990 3991 3992 3993 3994 3995 3996 3997"
@@ -33,10 +35,10 @@ for year in "${!year_process_map[@]}"; do
         for jobs in $which_job; do
         echo "Submitting: Year=$year, Process=$process", "Job=$jobs", "Cutoff=$cut"
         sbatch -p INTEL_HASWELL --time=70:00:00 --cpus-per-task=1 --nodes=1 \
-               --job-name="${process}vbsEFT_${year}_${process}_${jobs}" \
+               --job-name="${variable}${process}vbsEFT_${year}_${process}_${jobs}" \
                --output="log/vbs__${year}_${process}_${jobs}.out" \
                --error="log/vbs__${year}_${process}_${jobs}.err" \
-               submit_cis_analysis.sh "$year" "$process" "$jobs" "$cut"
+               submit_cis_analysis.sh "$year" "$process" "$jobs" "$cut" "$makedataCards"
     done
     done
     done

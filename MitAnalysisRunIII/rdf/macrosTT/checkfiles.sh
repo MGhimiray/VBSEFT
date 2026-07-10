@@ -8,6 +8,7 @@ set -uo pipefail
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
 cutoff=0000
+makeDataCards=$((whichana - 1000))
 
 outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/${whichana}/${cutoff}/histo/fillhisto_sswwAnalysis"
 
@@ -22,8 +23,8 @@ if [[ ! -d "$outdir" ]]; then
   exit 2
 fi
 
-# Jobs we expect to exist (0..9)
-jobs_list=$(seq 0 9)
+# Jobs we expect to exist (0..14)
+jobs_list=$(seq 0 14)
 
 # Map of <yearTag> -> <samples>
 declare -A samples
@@ -141,11 +142,11 @@ if ((${#missing_detail[@]})); then
     if [[ -z "${DRYRUN:-}" ]]; then
       command -v sbatch >/dev/null 2>&1 || { echo "ERROR: sbatch not found in PATH"; exit 4; }
       sbatch -p INTEL_HASWELL --time=70:00:00 --cpus-per-task=1 --nodes=1 \
-             --job-name="vbsoriginalTT_${tag}_${sample}_${job}" \
+             --job-name="${whichana}_${sample}oo_${job}_${cutoff}" \
              --output="log/vbs__${tag}_${sample}_${job}.out" \
              --error="log/vbs__${tag}_${sample}_${job}.err" \
-             submit_cis_analysis.sh "$tag" "$sample" "$job" "$cutoff"\
-        || echo "  (warn) submit failed for $tag $sample $job $cutoff"
+             submit_cis_analysis.sh "$tag" "$sample" "$job" "$cutoff" "$makedatacards"\
+        || echo "  (warn) submit failed for $tag $sample $job $cutoff" 
     fi
   done < <(printf "%s\n" "${missing_detail[@]}")
 

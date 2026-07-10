@@ -8,7 +8,7 @@ set -uo pipefail
 year=${1:?Usage: $0 YEAR WHICHANA}
 whichana=${2:?Usage: $0 YEAR WHICHANA}
 cutoff=0000
-
+makeDataCards=$((whichana - 1000))
 # Verify the capitalization ("matrix_method" vs "Matrix_method") matches your FS.
 outdir="/mnt/home/mghimiray/VBSStudies/Outputs_EFT/matrix_method/${whichana}/${cutoff}/histo/fillhisto_sswwAnalysis"
 
@@ -131,10 +131,10 @@ if ((${#missing_detail[@]})); then
     echo "./submit_cis_analysis.sh $tag $sample $job"
     if [[ -z "${DRYRUN:-}" ]]; then
       sbatch -p INTEL_HASWELL --time=70:00:00 --cpus-per-task=1 --nodes=1 \
-             --job-name="vbsmatrixmethod_${year}_${sample}_${job}" \
+             --job-name="${whichana}_${sample}oo_${job}_${cutoff}" \
              --output="log/vbs__${year}_${sample}_${job}.out" \
              --error="log/vbs__${year}_${sample}_${job}.err" \
-             submit_cis_analysis.sh "$tag" "$sample" "$job" "$cutoff"\
+             submit_cis_analysis.sh "$tag" "$sample" "$job" "$cutoff" "$makedatacards"\
         || echo "  (warn) submit failed for $tag $sample $job $cutoff"
     fi
   done < <(printf "%s\n" "${missing_detail[@]}")
