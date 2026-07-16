@@ -10,7 +10,7 @@ export theAna=sswwAnalysis$1
 
 source /mnt/home/mghimiray/VBSStudies/cmsstyle/cmsstyle/scripts/setup_cmstyle
 
-  input=/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1013/3000/merge1/
+  input=/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1014/0000/merge1/
 
   for year in 20220 20221 20230 20231 20240 20250;
   do

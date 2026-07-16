@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Define mapping between years and corresponding processes
-# to run ./submit_cis.sh year (year = 2022/2023/2024)
+# to run ./submit_cis.sh year variable (year = 2022/2023/2024)
 whichyear=$1
 variable=$2
 makedataCards=$((variable - 1000))
+
 if [ "$whichyear" = "2023" ]; then
     declare -A year_process_map
     year_process_map["20230"]="1022 1032 1042"
@@ -19,7 +20,7 @@ elif [ "$whichyear" = "2022" ]; then
     which_job="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14"
 elif [ "$whichyear" = "2025" ]; then
     year_process_map["20250"]="1021 1022 1023 1024 1025 1026 1031 1032 1033 1034 1035 1036 1041 1042 1043 1044 1045 1046"
-    which_job="0 1 2 3 4 5 6 7 8 9"
+    which_job="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14"
 fi
 
 cutoff="0000"

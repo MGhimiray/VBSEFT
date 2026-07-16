@@ -5,13 +5,13 @@ from utilsCategory import plotCategory
 ROOT.PyConfig.DisableRootLogon = True
 
 if __name__ == "__main__":
-    dir = "1013"
-    cutoffs = ["3000"]
-    year = "20220"
+    dir = "1014"
+    cutoffs = ["0000"]
+    year = "20240"
     for cut in cutoffs:
         base = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/{cut}/histo/fillhisto_sswwAnalysis"
         path = "fillhisto_sswwAnalysis"
-        year = 20230
+        year = 20240
         output = f"/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/{dir}/{cut}/merge1"
         mkdir = output
         if not os.path.exists(mkdir):

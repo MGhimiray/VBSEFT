@@ -55,7 +55,7 @@ correctionString = "_correction"
 
 doNtuples = False
 # 0 = T, 1 = M, 2 = L
-bTagSel = 2
+bTagSel = 1
 useBTaggingWeights = 1
 
 useFR = 1

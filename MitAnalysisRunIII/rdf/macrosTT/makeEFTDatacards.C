@@ -700,7 +700,7 @@ void makeEFTDatacards(int whichAna = 0, int fidAna = 0, TString InputDir = "/mnt
   }
   // End Fix a feature affecting first bin
 
-  TString outdir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1013/3000/datacards";
+  TString outdir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1014/0000/datacards";
   std::filesystem::create_directories(outdir.Data());
   TString c0Tag = TString::Format("%.6g", c0);
   c0Tag.ReplaceAll(".", "p");
