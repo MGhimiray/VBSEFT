@@ -1531,7 +1531,7 @@ float compute_jet_x_gamma_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass,
 }
 
 // Jet-lepton final variables
-float compute_jet_lepton_final_var(const float mjj, const float detajj, const float dphijj, const float zepvv, const float bdt_inc, const float mll, const int njets, const float M01, const float M1T, const float MT, unsigned int var)
+float compute_jet_lepton_final_var(const float mjj, const float detajj, const float dphijj, const float zepvv, const float bdt_inc, const float mll, const int njets, const float M01, const float M1T, const float MT, const float Rpt, unsigned int var)
 {
   if     (var < 10){
     int typeSelAux1 = -1;
@@ -1680,7 +1680,30 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     else if(mjj < 1200) typeSelAux9 = 1;
     else if(mjj < 1800) typeSelAux9 = 2;
     else                typeSelAux9 = 3;
+
+    int typeSelAux10 = -1;
+    if     (Rpt < -2.2) typeSelAux10 = 0;
+    else if(Rpt < -2.0) typeSelAux10 = 1;
+    else if(Rpt < -1.8) typeSelAux10 = 2;
+    else if(Rpt < -1.6) typeSelAux10 = 3;
+    else if(Rpt < -1.4) typeSelAux10 = 4;
+    else if(Rpt < -1.2) typeSelAux10 = 5;
+    else if(Rpt < -1.0) typeSelAux10 = 6;
+    else if(Rpt < -0.8) typeSelAux10 = 7;
+    else if(Rpt < -0.6) typeSelAux10 = 8;
+    else if(Rpt < -0.4) typeSelAux10 = 9;
+    else if(Rpt < -0.2) typeSelAux10 = 10;
+    else if(Rpt <  0.0) typeSelAux10 = 11;
+    else if(Rpt <  0.2) typeSelAux10 = 12;
+    else if(Rpt <  0.4) typeSelAux10 = 13;
+    else if(Rpt <  0.6) typeSelAux10 = 14;
+    else if(Rpt <  0.8) typeSelAux10 = 15;
+    else if(Rpt <  1.0) typeSelAux10 = 16;
+    else if(Rpt <  2.2) typeSelAux10 = 17;
+    else                typeSelAux10 = 18;
     
+
+
   if(var == 30){ // VBS EFT M01
     return (float)(typeSelAux6); ;
   }
@@ -1698,6 +1721,9 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
   }
   else if(var == 35){ // VBS EFT M1T vs mjj
     return (float)(typeSelAux7+8*typeSelAux9);
+  }
+  else if(var == 36){ // VBS EFT Rpt
+    return (float)(typeSelAux10);
   }
     return 0.0;
 } 
@@ -1720,7 +1746,7 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
       ptl1 = mu_pt[0]; ptl2 = el_pt[0]; 
     }
     float rpt = (ptl1*ptl2)/(pt[0]*pt[1]);
-    return log(rpt);
+    return std::log10(rpt);
   }
 
 

@@ -21,7 +21,7 @@ elif [ "$whichyear" = "2025" ]; then
     which_job="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14"
 fi
 
-cutoff="0000"
+cutoff="1500"
 # Iterate over each year
 for year in "${!year_process_map[@]}"; do
     echo "Year: $year"

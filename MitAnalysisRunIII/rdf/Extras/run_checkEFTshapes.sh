@@ -1,5 +1,6 @@
 #!/bin/bash
-#root -l -b -q 'checkEFTshapes.C("operator",value of c where c =1/c, original value of coeff, variable number)'
+#root -l -b -q 'checkEFTshapes.C("operator",value of c'() where c' =1/c, original value of coeff, variable number)'
+# e.x if we need to scale it to 10 and the initial value is 2 then, 10=2/c' so c' = 2/10 = 0.2
 
 mkdir -p plots
 

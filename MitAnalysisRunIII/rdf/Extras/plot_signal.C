@@ -13,8 +13,7 @@
 #include "iostream"
 
 void plot_signal(
-    const char* filename = "input.root",
-    const char* outname  = "signal_growth1014.png",
+    const char* filename    = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1016/0000/datacards/output_sswwAnalysis1016_S0_20240_bin0.root",    const char* outname  = "signal_growth1016.png",
     bool logY = false,
     int rebin = 1
 )
@@ -29,8 +28,19 @@ void plot_signal(
     }
 
     TH1* histo_sm       = (TH1*) f->Get("histo_sm");
-    TH1* histo_int      = (TH1*) f->Get("histo_quad_cM0");
-    TH1* histo_lin_quad = (TH1*) f->Get("histo_sm_lin_quad_cM0");
+    TH1* histo_int      = (TH1*) f->Get("histo_quad_cS0");
+    TH1* histo_lin_quad = (TH1*) f->Get("histo_sm_lin_quad_cS0");
+//    TH1* histo_QCDSSWW  = (TH1*) f->Get("histo_QCDSSWW");
+//    TH1* histo_EWKSSWW  = (TH1*) f->Get("histo_EWKSSWW");
+//    TH1* histo_EWKWZ    = (TH1*) f->Get("histo_EWKWZ ");
+//    TH1* histo_WZ       = (TH1*) f->Get("histo_WZ");
+//    TH1* histo_ZZ       = (TH1*) f->Get("histo_ZZ");
+//    TH1* histo_NonPrompt = (TH1*) f->Get("histo_NonPrompt");
+//    TH1* histo_VVV      = (TH1*) f->Get("histo_VVV");
+//    TH1* histo_TVX      = (TH1*) f->Get("histo_TVX");
+//    TH1* histo_VG       = (TH1*) f->Get("histo_VG");
+//    TH1* histo_WSM      = (TH1*) f->Get("histo_WSM");
+
 
     if (!histo_sm || !histo_int || !histo_lin_quad) {
         std::cerr << "Error: missing one or more histograms." << std::endl;
@@ -123,6 +133,7 @@ void plot_signal(
     leg->AddEntry(histo_sm, "SM", "l");
     leg->AddEntry(histo_int, "Quadratic", "l");
     leg->AddEntry(histo_lin_quad, "SM + INT + QUAD", "l");
+    
     leg->Draw();
 
     // -----------------------

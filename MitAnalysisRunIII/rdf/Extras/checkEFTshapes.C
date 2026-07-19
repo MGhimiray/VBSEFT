@@ -5,7 +5,7 @@
 #include <TStyle.h>
 #include <TSystem.h>
 #include <TString.h>
-
+#include <TLatex.h>
 #include <iostream>
 #include <map>
 
@@ -37,7 +37,7 @@ VarInfo getVariableInfo(int plotNumber)
 
     varMap[115] = {
         "MT",
-        "MT [GeV]"
+        "m_{T} [GeV]"
     };
 
     varMap[24] = {
@@ -68,9 +68,9 @@ void checkEFTshapes(TString opName = "T2", double cValue = 2.0, double coefficie
     // -------------------------------------------------
     // Base directory
     // -------------------------------------------------
-    TString baseDir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1001/0000/merge1";
+    TString baseDir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/OriginalTT/1013/0000/merge2";
 
-    TString filename = Form("%s/fillhisto_sswwAnalysis1001_20250_%d.root",
+    TString filename = Form("%s/fillhisto_sswwAnalysis1013_2027_%d.root",
                             baseDir.Data(), plotNumber);
 
     std::cout << "Reading file: " << filename << std::endl;
@@ -140,7 +140,7 @@ void checkEFTshapes(TString opName = "T2", double cValue = 2.0, double coefficie
     hsum->SetLineWidth(3);
     hsum->SetLineStyle(2);
 
-    hsm->SetTitle(Form("f_{%s} =%.2f", opName.Data(), coeff));
+    hsm->SetTitle(Form(" "));
 
     hsm->GetXaxis()->SetTitle(var.xTitle);
     hsm->GetYaxis()->SetTitle("Events");
@@ -152,8 +152,8 @@ void checkEFTshapes(TString opName = "T2", double cValue = 2.0, double coefficie
         hsm->GetXaxis()->SetRangeUser(var.xMin, var.xMax);
     }
     
-    hsm->SetMinimum(-3); // Set a small minimum to better see differences
-    hsm->SetMaximum(hsum->GetMaximum() * 1.2); // Add some headroom
+    hsm->SetMinimum(hint->GetMinimum()*1.2); // Set a small minimum to better see differences
+    hsm->SetMaximum(hsum->GetMaximum() * 1.5); // Add some headroom
 
     TCanvas *c = new TCanvas("c", "EFT Shapes", 800, 700);
 
@@ -162,14 +162,50 @@ void checkEFTshapes(TString opName = "T2", double cValue = 2.0, double coefficie
     hquad->Draw("HIST SAME");
     hsum->Draw("HIST SAME");
 
+    // -------------------------------------------------
+    // Horizontal line at y = 0
+    // -------------------------------------------------
+    TLine *zeroLine = new TLine(
+        hsm->GetXaxis()->GetXmin(), 0.0,
+        hsm->GetXaxis()->GetXmax(), 0.0
+    );
+    zeroLine->SetLineStyle(2);   // dotted
+    zeroLine->SetLineWidth(2);
+    zeroLine->SetLineColor(kGray+2);
+    zeroLine->Draw("SAME");
+
     // Do not use log scale because interference can be negative
     // c->SetLogy();
 
+    // -------------------------------------------------
+    // Labels on the upper-left side
+    // -------------------------------------------------
+    TLatex latex;
+    latex.SetNDC();
+    latex.SetTextFont(42);
+    latex.SetTextAlign(13);
+    
+    // Work-in-progress label
+    latex.SetTextSize(0.045);
+    latex.DrawLatex(0.15, 0.88, "#bf{CMS}");
+
+    latex.SetTextSize(0.03);
+    latex.DrawLatex(0.15, 0.83, "#it{Work in progress}");
+    
+    // Wilson-coefficient value
+    latex.SetTextSize(0.035);
+    latex.DrawLatex(
+        0.15,
+        0.78,
+        Form("f_{%s} = %.1f TeV^{-4}", opName.Data(), coeff)
+    );
+
+
     TLegend *leg = new TLegend(0.60, 0.70, 0.88, 0.88);
     leg->AddEntry(hsm,   "SM", "l");
-    leg->AddEntry(hint,  "Interference / c", "l");
-    leg->AddEntry(hquad, "Quadratic / c^{2}", "l");
-    leg->AddEntry(hsum,  "Total", "l");
+    leg->AddEntry(hint,  "Interference", "l");
+    leg->AddEntry(hquad, "Quadratic", "l");
+    leg->AddEntry(hsum,  "Interference+Quadratic", "l");
     leg->Draw();
 
     // -------------------------------------------------
