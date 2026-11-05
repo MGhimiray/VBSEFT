@@ -9,15 +9,18 @@ from utilsAna import SwitchSample, groupFiles, getTriggerFromJson, getLeptomSelF
 from utilsSelection import selectionTauVeto, selectionPhoton, selectionJetMet, selection3LVar, selectionLGVar, selectionTrigger2L, selectionElMu, selectionWeigths, selectionGenLepJet, makeFinalVariableVar, makeFinalVariable2DVar
 from utilsMVA import redefineVBSIncMVAVariables
 import tmva_helper_xml
+import numpy as np
+from array import array
 
-makeDataCards = 4 # 1 (njets), 2-1006 (lepton flavor), 3-1002 (3D), 4-1001 (BDT 2D), 5-1003 (BDT 1D), 6-1004 (mjj), 7-1005 (mjj diff)
+#makeDataCards = 4 # 1 (njets), 2-1006 (lepton flavor), 3-1002 (3D), 4-1001 (BDT 2D), 5-1003 (BDT 1D), 6-1004 (mjj), 7-1005 (mjj diff)
+#8, (MTvs mjj)
 genVBSSel = 1
 correctionString = "_correction"
 
 versionDoEWKQCD = False
 doNtuples = False
 # 0 = T, 1 = M, 2 = L
-bTagSel = 0
+bTagSel = 1
 useBTaggingWeights = 1
 
 useFR = 1
@@ -25,7 +28,6 @@ whichAna = 2
 
 altMass = "Def"
 jetEtaCut = 2.5
-if(makeDataCards >= 3): jetEtaCut = 4.7
 metCut = 30.0
 
 selectionJsonPath = "config/selection.json"
@@ -196,7 +198,9 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
             "vbs_pttot",
             "vbs_detavvj1",
             "vbs_detavvj2",
-            "vbs_ptbalance"
+            "vbs_ptbalance",
+            "vbs_dphijjll",
+            "vbs_rpt"
     ]:
         branchList.push_back(branchName)
 
@@ -325,19 +329,40 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
     dfwzbvbscatJERUp          = []
     dfwzbvbscatJESUp          = []
     dfwzbvbscatUnclusteredUp  = []
+    df_tmp = []
+
     for x in range(nCat):
+        cutOffVal = int(cutOff)
         dfwzcat.append(dfbase.Filter("theCat=={0}".format(x), "correct category ({0})".format(x)))
-
         dfsscat.append(dfwzcat[x].Filter("abs(Sum(fake_Muon_charge)+Sum(fake_Electron_charge)) == 3", "+/- 3 net charge"))
-
         dfwzcat[x] = dfwzcat[x].Filter("abs(Sum(fake_Muon_charge)+Sum(fake_Electron_charge)) == 1", "+/- 1 net charge")
-
-        if((x == plotCategory("kPlotEWKWZ") or (x == plotCategory("kPlotWZ") and versionDoEWKQCD == True)) and isData == "false"):
-            dfwzcat[x] = (dfwzcat[x].Define("theGenCat",   "compute_vbs_gen_category({0},ngood_GenJets,good_GenJet_pt,good_GenJet_eta,good_GenJet_phi,good_GenJet_mass,ngood_GenDressedLeptons,good_GenDressedLepton_pdgId,good_GenDressedLepton_hasTauAnc,good_GenDressedLepton_pt,good_GenDressedLepton_eta,good_GenDressedLepton_phi,good_GenDressedLepton_mass,11)".format(genVBSSel))
-                                    )
+    
+    
+        if ((x == plotCategory("kPlotEFTM2QuadWZ") or x == plotCategory("kPlotEFTM2IntWZ") or
+               x == plotCategory("kPlotEFTM3QuadWZ") or x == plotCategory("kPlotEFTM3IntWZ") or
+               x == plotCategory("kPlotEFTM4QuadWZ") or x == plotCategory("kPlotEFTM4IntWZ") or
+               x == plotCategory("kPlotEFTM5QuadWZ") or x == plotCategory("kPlotEFTM5IntWZ") or
+               x == plotCategory("kPlotEFTT5QuadWZ") or x == plotCategory("kPlotEFTT5IntWZ") or
+               x == plotCategory("kPlotEFTT6QuadWZ") or x == plotCategory("kPlotEFTT6IntWZ") or
+               x == plotCategory("kPlotEFTT7QuadWZ") or x == plotCategory("kPlotEFTT7IntWZ"))
+              and isData == "false"):
+    
+            df_tmp = (dfwzcat[x].Define("theGenCat", "0")
+                      .Define("invariant_mass","Get_mwz(good_GenDressedLepton_pt,good_GenDressedLepton_eta,good_GenDressedLepton_phi,good_GenDressedLepton_mass,good_GenDressedLepton_pz, GenMET_pt, GenMET_phi)")
+                     )
+    
+            if cutOffVal > 0:
+                df_tmp = df_tmp.Filter("invariant_mass < {0}".format(cutOffVal), "mWZ < {0} GeV".format(cutOffVal))
+            dfwzcat[x] = df_tmp
+        
+        elif isData == "true":
+            dfwzcat[x] = (dfwzcat[x].Define("theGenCat","0")
+                          .Define("invariant_mass","0.0"))
         else:
-            dfwzcat[x] = (dfwzcat[x].Define("theGenCat","{0}".format(0))
-                                    )
+            dfwzcat[x] = (dfwzcat[x].Define("theGenCat","0")
+                          .Define("invariant_mass","Get_mwz(good_GenDressedLepton_pt,good_GenDressedLepton_eta,good_GenDressedLepton_phi,good_GenDressedLepton_mass, good_GenDressedLepton_pz, GenMET_pt, GenMET_phi)"))
+    
+            
 
         dfwzvbscatMuonMomUp    .append(dfwzcat[x])
         dfwzvbscatElectronMomUp.append(dfwzcat[x])
@@ -686,9 +711,9 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histo[28][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(28,x), "histo_{0}_{1}".format(28,x), 4,1.5, 5.5), "ngood_jets","weight")
 
         histo[100][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(100,x), "histo_{0}_{1}".format(100,x), 4,-0.5, 3.5), "TriLepton_flavor","weight")
-        histo[102][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(102,x), "histo_{0}_{1}".format(102,x), 20,500,2500), "vbs_mjj","weight")
+        histo[102][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(102,x), "histo_{0}_{1}".format(102,x), 14,500,2600), "vbs_mjj","weight")
         histo[104][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(104,x), "histo_{0}_{1}".format(104,x), 20,0,800), "vbs_ptjj","weight")
-        histo[106][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(106,x), "histo_{0}_{1}".format(106,x), 14,2.5,9.5), "vbs_detajj","weight")
+        histo[106][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(106,x), "histo_{0}_{1}".format(106,x), 13,2.5,9.0), "vbs_detajj","weight")
         histo[108][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(108,x), "histo_{0}_{1}".format(108,x), 20,0,3.1416), "vbs_dphijj","weight")
         histo[110][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(110,x), "histo_{0}_{1}".format(110,x), 20,0,800), "vbs_ptj1","weight")
         histo[112][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(112,x), "histo_{0}_{1}".format(112,x), 20,0,400), "vbs_ptj2","weight")
@@ -703,9 +728,9 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histo[130][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(130,x), "histo_{0}_{1}".format(130,x), 20,-1,3), "vbs_ptbalance","weight")
 
         histo[101][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(101,x), "histo_{0}_{1}".format(101,x), 4,-0.5, 3.5), "TriLepton_flavor","weight")
-        histo[103][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(103,x), "histo_{0}_{1}".format(103,x), 20,500,2500), "vbs_mjj","weight")
+        histo[103][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(103,x), "histo_{0}_{1}".format(103,x), 14,500,2600), "vbs_mjj","weight")
         histo[105][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(105,x), "histo_{0}_{1}".format(105,x), 20,0,800), "vbs_ptjj","weight")
-        histo[107][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(107,x), "histo_{0}_{1}".format(107,x), 14,2.5,9.5), "vbs_detajj","weight")
+        histo[107][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(107,x), "histo_{0}_{1}".format(107,x), 13,2.5,9.0), "vbs_detajj","weight")
         histo[109][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(109,x), "histo_{0}_{1}".format(109,x), 20,0,3.1416), "vbs_dphijj","weight")
         histo[111][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(111,x), "histo_{0}_{1}".format(111,x), 20,0,800), "vbs_ptj1","weight")
         histo[113][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(113,x), "histo_{0}_{1}".format(113,x), 20,0,400), "vbs_ptj2","weight")
@@ -718,9 +743,17 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histo[127][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(127,x), "histo_{0}_{1}".format(127,x), 20,0,8), "vbs_detavvj1","weight")
         histo[129][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(129,x), "histo_{0}_{1}".format(129,x), 20,0,8), "vbs_detavvj2","weight")
         histo[131][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(131,x), "histo_{0}_{1}".format(131,x), 20,-1,3), "vbs_ptbalance","weight")
+        histo[132][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(132,x), "histo_{0}_{1}".format(132,x), 20,0,2000), "invariant_mass","weight")
+        histo[133][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(133,x), "histo_{0}_{1}".format(133,x), 20,0,2000), "invariant_mass","weight")
+        histo[134][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(134,x), "histo_{0}_{1}".format(134,x), 20,0,2000), "MT","weight")
+        histo[135][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(135,x), "histo_{0}_{1}".format(135,x), 20,0,2000), "MT","weight")
+    #    histo[134][x] = dfwzvbscat[x].Histo1D(("histo_{0}_{1}".format(134,x), "histo_{0}_{1}".format(134,x),5,np.array([0.,400.,750.,1050.,1350.,2000],dtype=np.float64)), "MT","weight")
+    #    histo[135][x] = dfwzbvbscat[x].Histo1D(("histo_{0}_{1}".format(135,x), "histo_{0}_{1}".format(135,x),5,np.array([0.,400.,750.,1050.,1350.,2000],dtype=np.float64)), "MT","weight")
 
+        output_dir = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/fakerratewz/{0}/{1}/ntuple/".format(dirT2, cutOff)
+        os.makedirs(output_dir, exist_ok=True)
         if(doNtuples == True and x == theCat):
-            outputFile = "ntupleWZAna_sample{0}_year{1}_job{2}.root".format(count,year,whichJob)
+            outputFile = f"{output_dir}/ntupleWZAna_sample{count}_year{year}_job{whichJob}.root"
             dfwzvbscat[x].Snapshot("events", outputFile, branchList)
 
         histo[37][x] = dfzgcat[x].Histo1D(("histo_{0}_{1}".format(37,x), "histo_{0}_{1}".format(37,x), 40, 10, 210), "m3l{0}".format(altMass),"weight")
@@ -756,7 +789,7 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
         histo[97][x] = dfwzcat[x].Histo1D(("histo_{0}_{1}".format(97,x), "histo_{0}_{1}".format(97,x), 4,-0.5, 3.5), "TriLepton_flavor","weight5")
         histo[98][x] = dfwzcat[x].Histo1D(("histo_{0}_{1}".format(98,x), "histo_{0}_{1}".format(98,x), 4,-0.5, 3.5), "TriLepton_flavor","weight6")
         histo[99][x] = dfwzcat[x].Histo1D(("histo_{0}_{1}".format(99,x), "histo_{0}_{1}".format(99,x), 4,-0.5, 3.5), "TriLepton_flavor","weight7")
-
+        
         x1Bins = array('d', [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0])
         x2Bins = array('d', [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0])
 
@@ -951,7 +984,7 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 histoNonPrompt[4+startNonPrompt] = dfwzbcat[x].Histo1D(("histoNonPrompt_{0}".format(4+startNonPrompt), "histoNonPrompt_{0}".format(4+startNonPrompt), len(xBins)-1,xBins), "TriLepton_flavor","weightFakeAlte1")
                 histoNonPrompt[5+startNonPrompt] = dfwzbcat[x].Histo1D(("histoNonPrompt_{0}".format(5+startNonPrompt), "histoNonPrompt_{0}".format(5+startNonPrompt), len(xBins)-1,xBins), "TriLepton_flavor","weightFakeAlte2")
 
-        elif(makeDataCards == 3 or makeDataCards == 4 or makeDataCards == 5 or makeDataCards == 6):
+        elif(makeDataCards == 3 or makeDataCards == 4 or makeDataCards == 5 or makeDataCards == 6 or makeDataCards == 8):
             x1Bins = array('d', [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0])
             x2Bins = array('d', [0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0])
             if(makeDataCards == 3): # 3D
@@ -974,78 +1007,87 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 x2Bins = array('d', [500,700,900,1100,1300,1650,2000,2450,2900])
                 varSel1 = 20
                 varSel2 = 20
+            elif(makeDataCards == 8): # mjj vs MT
+                # WZ SR: 5 MT bins x 2 mjj bins = 10 
+                x1Bins = array('d', [
+                    -0.5, 0.5, 1.5, 2.5, 3.5,
+                     4.5, 5.5, 6.5, 7.5, 8.5, 9.5])
+                # WZ b-tag CR: 2 mjj bins
+                x2Bins = array('d', [-0.5, 0.5])
+                varSel1 = 43
+                varSel2 = 44
 
-            dfwzvbscat             [x] = dfwzvbscat             [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mll{0},ngood_jets,{1})".format(altMass,varSel1))
-            dfwzvbscatMuonMomUp    [x] = dfwzvbscatMuonMomUp    [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllMuonMomUp,ngood_jets,{1})".format(altMass,varSel1))
-            dfwzvbscatElectronMomUp[x] = dfwzvbscatElectronMomUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllElectronMomUp,ngood_jets,{1})".format(altMass,varSel1))
-            dfwzvbscatJes00Up      [x] = dfwzvbscatJes00Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes00Up,vbs_detajjJes00Up,vbs_dphijjJes00Up,vbs_zepvvJes00Up,bdt_vbfincJes00Up[0],mll{0},ngood_jetsJes00Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes01Up      [x] = dfwzvbscatJes01Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes01Up,vbs_detajjJes01Up,vbs_dphijjJes01Up,vbs_zepvvJes01Up,bdt_vbfincJes01Up[0],mll{0},ngood_jetsJes01Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes02Up      [x] = dfwzvbscatJes02Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes02Up,vbs_detajjJes02Up,vbs_dphijjJes02Up,vbs_zepvvJes02Up,bdt_vbfincJes02Up[0],mll{0},ngood_jetsJes02Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes03Up      [x] = dfwzvbscatJes03Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes03Up,vbs_detajjJes03Up,vbs_dphijjJes03Up,vbs_zepvvJes03Up,bdt_vbfincJes03Up[0],mll{0},ngood_jetsJes03Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes04Up      [x] = dfwzvbscatJes04Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes04Up,vbs_detajjJes04Up,vbs_dphijjJes04Up,vbs_zepvvJes04Up,bdt_vbfincJes04Up[0],mll{0},ngood_jetsJes04Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes05Up      [x] = dfwzvbscatJes05Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes05Up,vbs_detajjJes05Up,vbs_dphijjJes05Up,vbs_zepvvJes05Up,bdt_vbfincJes05Up[0],mll{0},ngood_jetsJes05Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes06Up      [x] = dfwzvbscatJes06Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes06Up,vbs_detajjJes06Up,vbs_dphijjJes06Up,vbs_zepvvJes06Up,bdt_vbfincJes06Up[0],mll{0},ngood_jetsJes06Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes07Up      [x] = dfwzvbscatJes07Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes07Up,vbs_detajjJes07Up,vbs_dphijjJes07Up,vbs_zepvvJes07Up,bdt_vbfincJes07Up[0],mll{0},ngood_jetsJes07Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes08Up      [x] = dfwzvbscatJes08Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes08Up,vbs_detajjJes08Up,vbs_dphijjJes08Up,vbs_zepvvJes08Up,bdt_vbfincJes08Up[0],mll{0},ngood_jetsJes08Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes09Up      [x] = dfwzvbscatJes09Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes09Up,vbs_detajjJes09Up,vbs_dphijjJes09Up,vbs_zepvvJes09Up,bdt_vbfincJes09Up[0],mll{0},ngood_jetsJes09Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes10Up      [x] = dfwzvbscatJes10Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes10Up,vbs_detajjJes10Up,vbs_dphijjJes10Up,vbs_zepvvJes10Up,bdt_vbfincJes10Up[0],mll{0},ngood_jetsJes10Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes11Up      [x] = dfwzvbscatJes11Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes11Up,vbs_detajjJes11Up,vbs_dphijjJes11Up,vbs_zepvvJes11Up,bdt_vbfincJes11Up[0],mll{0},ngood_jetsJes11Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes12Up      [x] = dfwzvbscatJes12Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes12Up,vbs_detajjJes12Up,vbs_dphijjJes12Up,vbs_zepvvJes12Up,bdt_vbfincJes12Up[0],mll{0},ngood_jetsJes12Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes13Up      [x] = dfwzvbscatJes13Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes13Up,vbs_detajjJes13Up,vbs_dphijjJes13Up,vbs_zepvvJes13Up,bdt_vbfincJes13Up[0],mll{0},ngood_jetsJes13Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes14Up      [x] = dfwzvbscatJes14Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes14Up,vbs_detajjJes14Up,vbs_dphijjJes14Up,vbs_zepvvJes14Up,bdt_vbfincJes14Up[0],mll{0},ngood_jetsJes14Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes15Up      [x] = dfwzvbscatJes15Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes15Up,vbs_detajjJes15Up,vbs_dphijjJes15Up,vbs_zepvvJes15Up,bdt_vbfincJes15Up[0],mll{0},ngood_jetsJes15Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes16Up      [x] = dfwzvbscatJes16Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes16Up,vbs_detajjJes16Up,vbs_dphijjJes16Up,vbs_zepvvJes16Up,bdt_vbfincJes16Up[0],mll{0},ngood_jetsJes16Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes17Up      [x] = dfwzvbscatJes17Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes17Up,vbs_detajjJes17Up,vbs_dphijjJes17Up,vbs_zepvvJes17Up,bdt_vbfincJes17Up[0],mll{0},ngood_jetsJes17Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes18Up      [x] = dfwzvbscatJes18Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes18Up,vbs_detajjJes18Up,vbs_dphijjJes18Up,vbs_zepvvJes18Up,bdt_vbfincJes18Up[0],mll{0},ngood_jetsJes18Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes19Up      [x] = dfwzvbscatJes19Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes19Up,vbs_detajjJes19Up,vbs_dphijjJes19Up,vbs_zepvvJes19Up,bdt_vbfincJes19Up[0],mll{0},ngood_jetsJes19Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes20Up      [x] = dfwzvbscatJes20Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes20Up,vbs_detajjJes20Up,vbs_dphijjJes20Up,vbs_zepvvJes20Up,bdt_vbfincJes20Up[0],mll{0},ngood_jetsJes20Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes21Up      [x] = dfwzvbscatJes21Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes21Up,vbs_detajjJes21Up,vbs_dphijjJes21Up,vbs_zepvvJes21Up,bdt_vbfincJes21Up[0],mll{0},ngood_jetsJes21Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes22Up      [x] = dfwzvbscatJes22Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes22Up,vbs_detajjJes22Up,vbs_dphijjJes22Up,vbs_zepvvJes22Up,bdt_vbfincJes22Up[0],mll{0},ngood_jetsJes22Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes23Up      [x] = dfwzvbscatJes23Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes23Up,vbs_detajjJes23Up,vbs_dphijjJes23Up,vbs_zepvvJes23Up,bdt_vbfincJes23Up[0],mll{0},ngood_jetsJes23Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes24Up      [x] = dfwzvbscatJes24Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes24Up,vbs_detajjJes24Up,vbs_dphijjJes24Up,vbs_zepvvJes24Up,bdt_vbfincJes24Up[0],mll{0},ngood_jetsJes24Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes25Up      [x] = dfwzvbscatJes25Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes25Up,vbs_detajjJes25Up,vbs_dphijjJes25Up,vbs_zepvvJes25Up,bdt_vbfincJes25Up[0],mll{0},ngood_jetsJes25Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes26Up      [x] = dfwzvbscatJes26Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes26Up,vbs_detajjJes26Up,vbs_dphijjJes26Up,vbs_zepvvJes26Up,bdt_vbfincJes26Up[0],mll{0},ngood_jetsJes26Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJes27Up      [x] = dfwzvbscatJes27Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes27Up,vbs_detajjJes27Up,vbs_dphijjJes27Up,vbs_zepvvJes27Up,bdt_vbfincJes27Up[0],mll{0},ngood_jetsJes27Up,{1})".format(altMass,varSel1))
-            dfwzvbscatJerUp        [x] = dfwzvbscatJerUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJerUp  ,vbs_detajjJerUp  ,vbs_dphijjJerUp  ,vbs_zepvvJerUp  ,bdt_vbfincJerUp  [0],mll{0},ngood_jetsJerUp  ,{1})".format(altMass,varSel1))
-            dfwzvbscatJERUp        [x] = dfwzvbscatJERUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj       ,vbs_zepvv	,bdt_vbfinc	  [0],mll{0},ngood_jets       ,{1})".format(altMass,varSel1))
-            dfwzvbscatJESUp        [x] = dfwzvbscatJESUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj       ,vbs_zepvv	,bdt_vbfinc	  [0],mll{0},ngood_jets       ,{1})".format(altMass,varSel1))
-            dfwzvbscatUnclusteredUp[x] = dfwzvbscatUnclusteredUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj       ,vbs_zepvv	,bdt_vbfinc	  [0],mll{0},ngood_jets       ,{1})".format(altMass,varSel1))
+            dfwzvbscat             [x] = dfwzvbscat             [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mll{0},ngood_jets,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatMuonMomUp    [x] = dfwzvbscatMuonMomUp    [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllMuonMomUp,ngood_jets,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatElectronMomUp[x] = dfwzvbscatElectronMomUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllElectronMomUp,ngood_jets,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes00Up      [x] = dfwzvbscatJes00Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes00Up,vbs_detajjJes00Up,vbs_dphijjJes00Up,vbs_zepvvJes00Up,bdt_vbfincJes00Up[0],mll{0},ngood_jetsJes00Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes01Up      [x] = dfwzvbscatJes01Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes01Up,vbs_detajjJes01Up,vbs_dphijjJes01Up,vbs_zepvvJes01Up,bdt_vbfincJes01Up[0],mll{0},ngood_jetsJes01Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes02Up      [x] = dfwzvbscatJes02Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes02Up,vbs_detajjJes02Up,vbs_dphijjJes02Up,vbs_zepvvJes02Up,bdt_vbfincJes02Up[0],mll{0},ngood_jetsJes02Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes03Up      [x] = dfwzvbscatJes03Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes03Up,vbs_detajjJes03Up,vbs_dphijjJes03Up,vbs_zepvvJes03Up,bdt_vbfincJes03Up[0],mll{0},ngood_jetsJes03Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes04Up      [x] = dfwzvbscatJes04Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes04Up,vbs_detajjJes04Up,vbs_dphijjJes04Up,vbs_zepvvJes04Up,bdt_vbfincJes04Up[0],mll{0},ngood_jetsJes04Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes05Up      [x] = dfwzvbscatJes05Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes05Up,vbs_detajjJes05Up,vbs_dphijjJes05Up,vbs_zepvvJes05Up,bdt_vbfincJes05Up[0],mll{0},ngood_jetsJes05Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes06Up      [x] = dfwzvbscatJes06Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes06Up,vbs_detajjJes06Up,vbs_dphijjJes06Up,vbs_zepvvJes06Up,bdt_vbfincJes06Up[0],mll{0},ngood_jetsJes06Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes07Up      [x] = dfwzvbscatJes07Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes07Up,vbs_detajjJes07Up,vbs_dphijjJes07Up,vbs_zepvvJes07Up,bdt_vbfincJes07Up[0],mll{0},ngood_jetsJes07Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes08Up      [x] = dfwzvbscatJes08Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes08Up,vbs_detajjJes08Up,vbs_dphijjJes08Up,vbs_zepvvJes08Up,bdt_vbfincJes08Up[0],mll{0},ngood_jetsJes08Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes09Up      [x] = dfwzvbscatJes09Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes09Up,vbs_detajjJes09Up,vbs_dphijjJes09Up,vbs_zepvvJes09Up,bdt_vbfincJes09Up[0],mll{0},ngood_jetsJes09Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes10Up      [x] = dfwzvbscatJes10Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes10Up,vbs_detajjJes10Up,vbs_dphijjJes10Up,vbs_zepvvJes10Up,bdt_vbfincJes10Up[0],mll{0},ngood_jetsJes10Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes11Up      [x] = dfwzvbscatJes11Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes11Up,vbs_detajjJes11Up,vbs_dphijjJes11Up,vbs_zepvvJes11Up,bdt_vbfincJes11Up[0],mll{0},ngood_jetsJes11Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes12Up      [x] = dfwzvbscatJes12Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes12Up,vbs_detajjJes12Up,vbs_dphijjJes12Up,vbs_zepvvJes12Up,bdt_vbfincJes12Up[0],mll{0},ngood_jetsJes12Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes13Up      [x] = dfwzvbscatJes13Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes13Up,vbs_detajjJes13Up,vbs_dphijjJes13Up,vbs_zepvvJes13Up,bdt_vbfincJes13Up[0],mll{0},ngood_jetsJes13Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes14Up      [x] = dfwzvbscatJes14Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes14Up,vbs_detajjJes14Up,vbs_dphijjJes14Up,vbs_zepvvJes14Up,bdt_vbfincJes14Up[0],mll{0},ngood_jetsJes14Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes15Up      [x] = dfwzvbscatJes15Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes15Up,vbs_detajjJes15Up,vbs_dphijjJes15Up,vbs_zepvvJes15Up,bdt_vbfincJes15Up[0],mll{0},ngood_jetsJes15Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes16Up      [x] = dfwzvbscatJes16Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes16Up,vbs_detajjJes16Up,vbs_dphijjJes16Up,vbs_zepvvJes16Up,bdt_vbfincJes16Up[0],mll{0},ngood_jetsJes16Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes17Up      [x] = dfwzvbscatJes17Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes17Up,vbs_detajjJes17Up,vbs_dphijjJes17Up,vbs_zepvvJes17Up,bdt_vbfincJes17Up[0],mll{0},ngood_jetsJes17Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes18Up      [x] = dfwzvbscatJes18Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes18Up,vbs_detajjJes18Up,vbs_dphijjJes18Up,vbs_zepvvJes18Up,bdt_vbfincJes18Up[0],mll{0},ngood_jetsJes18Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes19Up      [x] = dfwzvbscatJes19Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes19Up,vbs_detajjJes19Up,vbs_dphijjJes19Up,vbs_zepvvJes19Up,bdt_vbfincJes19Up[0],mll{0},ngood_jetsJes19Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes20Up      [x] = dfwzvbscatJes20Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes20Up,vbs_detajjJes20Up,vbs_dphijjJes20Up,vbs_zepvvJes20Up,bdt_vbfincJes20Up[0],mll{0},ngood_jetsJes20Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes21Up      [x] = dfwzvbscatJes21Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes21Up,vbs_detajjJes21Up,vbs_dphijjJes21Up,vbs_zepvvJes21Up,bdt_vbfincJes21Up[0],mll{0},ngood_jetsJes21Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes22Up      [x] = dfwzvbscatJes22Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes22Up,vbs_detajjJes22Up,vbs_dphijjJes22Up,vbs_zepvvJes22Up,bdt_vbfincJes22Up[0],mll{0},ngood_jetsJes22Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes23Up      [x] = dfwzvbscatJes23Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes23Up,vbs_detajjJes23Up,vbs_dphijjJes23Up,vbs_zepvvJes23Up,bdt_vbfincJes23Up[0],mll{0},ngood_jetsJes23Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes24Up      [x] = dfwzvbscatJes24Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes24Up,vbs_detajjJes24Up,vbs_dphijjJes24Up,vbs_zepvvJes24Up,bdt_vbfincJes24Up[0],mll{0},ngood_jetsJes24Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes25Up      [x] = dfwzvbscatJes25Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes25Up,vbs_detajjJes25Up,vbs_dphijjJes25Up,vbs_zepvvJes25Up,bdt_vbfincJes25Up[0],mll{0},ngood_jetsJes25Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes26Up      [x] = dfwzvbscatJes26Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes26Up,vbs_detajjJes26Up,vbs_dphijjJes26Up,vbs_zepvvJes26Up,bdt_vbfincJes26Up[0],mll{0},ngood_jetsJes26Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJes27Up      [x] = dfwzvbscatJes27Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes27Up,vbs_detajjJes27Up,vbs_dphijjJes27Up,vbs_zepvvJes27Up,bdt_vbfincJes27Up[0],mll{0},ngood_jetsJes27Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJerUp        [x] = dfwzvbscatJerUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJerUp  ,vbs_detajjJerUp  ,vbs_dphijjJerUp  ,vbs_zepvvJerUp  ,bdt_vbfincJerUp  [0],mll{0},ngood_jetsJerUp  ,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJERUp        [x] = dfwzvbscatJERUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj       ,vbs_zepvv	,bdt_vbfinc	  [0],mll{0},ngood_jets       ,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatJESUp        [x] = dfwzvbscatJESUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj       ,vbs_zepvv	,bdt_vbfinc	  [0],mll{0},ngood_jets       ,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
+            dfwzvbscatUnclusteredUp[x] = dfwzvbscatUnclusteredUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj       ,vbs_zepvv	,bdt_vbfinc	  [0],mll{0},ngood_jets       ,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel1))
 
-            dfwzbvbscat             [x] = dfwzbvbscat             [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mll{0},ngood_jets,{1})".format(altMass,varSel2))
-            dfwzbvbscatMuonMomUp    [x] = dfwzbvbscatMuonMomUp    [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllMuonMomUp,ngood_jets,{1})".format(altMass,varSel2))
-            dfwzbvbscatElectronMomUp[x] = dfwzbvbscatElectronMomUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllElectronMomUp,ngood_jets,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes00Up      [x] = dfwzbvbscatJes00Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes00Up,vbs_detajjJes00Up,vbs_dphijjJes00Up,vbs_zepvvJes00Up,bdt_vbfincJes00Up[0],mll{0},ngood_jetsJes00Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes01Up      [x] = dfwzbvbscatJes01Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes01Up,vbs_detajjJes01Up,vbs_dphijjJes01Up,vbs_zepvvJes01Up,bdt_vbfincJes01Up[0],mll{0},ngood_jetsJes01Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes02Up      [x] = dfwzbvbscatJes02Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes02Up,vbs_detajjJes02Up,vbs_dphijjJes02Up,vbs_zepvvJes02Up,bdt_vbfincJes02Up[0],mll{0},ngood_jetsJes02Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes03Up      [x] = dfwzbvbscatJes03Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes03Up,vbs_detajjJes03Up,vbs_dphijjJes03Up,vbs_zepvvJes03Up,bdt_vbfincJes03Up[0],mll{0},ngood_jetsJes03Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes04Up      [x] = dfwzbvbscatJes04Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes04Up,vbs_detajjJes04Up,vbs_dphijjJes04Up,vbs_zepvvJes04Up,bdt_vbfincJes04Up[0],mll{0},ngood_jetsJes04Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes05Up      [x] = dfwzbvbscatJes05Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes05Up,vbs_detajjJes05Up,vbs_dphijjJes05Up,vbs_zepvvJes05Up,bdt_vbfincJes05Up[0],mll{0},ngood_jetsJes05Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes06Up      [x] = dfwzbvbscatJes06Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes06Up,vbs_detajjJes06Up,vbs_dphijjJes06Up,vbs_zepvvJes06Up,bdt_vbfincJes06Up[0],mll{0},ngood_jetsJes06Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes07Up      [x] = dfwzbvbscatJes07Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes07Up,vbs_detajjJes07Up,vbs_dphijjJes07Up,vbs_zepvvJes07Up,bdt_vbfincJes07Up[0],mll{0},ngood_jetsJes07Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes08Up      [x] = dfwzbvbscatJes08Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes08Up,vbs_detajjJes08Up,vbs_dphijjJes08Up,vbs_zepvvJes08Up,bdt_vbfincJes08Up[0],mll{0},ngood_jetsJes08Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes09Up      [x] = dfwzbvbscatJes09Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes09Up,vbs_detajjJes09Up,vbs_dphijjJes09Up,vbs_zepvvJes09Up,bdt_vbfincJes09Up[0],mll{0},ngood_jetsJes09Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes10Up      [x] = dfwzbvbscatJes10Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes10Up,vbs_detajjJes10Up,vbs_dphijjJes10Up,vbs_zepvvJes10Up,bdt_vbfincJes10Up[0],mll{0},ngood_jetsJes10Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes11Up      [x] = dfwzbvbscatJes11Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes11Up,vbs_detajjJes11Up,vbs_dphijjJes11Up,vbs_zepvvJes11Up,bdt_vbfincJes11Up[0],mll{0},ngood_jetsJes11Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes12Up      [x] = dfwzbvbscatJes12Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes12Up,vbs_detajjJes12Up,vbs_dphijjJes12Up,vbs_zepvvJes12Up,bdt_vbfincJes12Up[0],mll{0},ngood_jetsJes12Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes13Up      [x] = dfwzbvbscatJes13Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes13Up,vbs_detajjJes13Up,vbs_dphijjJes13Up,vbs_zepvvJes13Up,bdt_vbfincJes13Up[0],mll{0},ngood_jetsJes13Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes14Up      [x] = dfwzbvbscatJes14Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes14Up,vbs_detajjJes14Up,vbs_dphijjJes14Up,vbs_zepvvJes14Up,bdt_vbfincJes14Up[0],mll{0},ngood_jetsJes14Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes15Up      [x] = dfwzbvbscatJes15Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes15Up,vbs_detajjJes15Up,vbs_dphijjJes15Up,vbs_zepvvJes15Up,bdt_vbfincJes15Up[0],mll{0},ngood_jetsJes15Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes16Up      [x] = dfwzbvbscatJes16Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes16Up,vbs_detajjJes16Up,vbs_dphijjJes16Up,vbs_zepvvJes16Up,bdt_vbfincJes16Up[0],mll{0},ngood_jetsJes16Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes17Up      [x] = dfwzbvbscatJes17Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes17Up,vbs_detajjJes17Up,vbs_dphijjJes17Up,vbs_zepvvJes17Up,bdt_vbfincJes17Up[0],mll{0},ngood_jetsJes17Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes18Up      [x] = dfwzbvbscatJes18Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes18Up,vbs_detajjJes18Up,vbs_dphijjJes18Up,vbs_zepvvJes18Up,bdt_vbfincJes18Up[0],mll{0},ngood_jetsJes18Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes19Up      [x] = dfwzbvbscatJes19Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes19Up,vbs_detajjJes19Up,vbs_dphijjJes19Up,vbs_zepvvJes19Up,bdt_vbfincJes19Up[0],mll{0},ngood_jetsJes19Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes20Up      [x] = dfwzbvbscatJes20Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes20Up,vbs_detajjJes20Up,vbs_dphijjJes20Up,vbs_zepvvJes20Up,bdt_vbfincJes20Up[0],mll{0},ngood_jetsJes20Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes21Up      [x] = dfwzbvbscatJes21Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes21Up,vbs_detajjJes21Up,vbs_dphijjJes21Up,vbs_zepvvJes21Up,bdt_vbfincJes21Up[0],mll{0},ngood_jetsJes21Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes22Up      [x] = dfwzbvbscatJes22Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes22Up,vbs_detajjJes22Up,vbs_dphijjJes22Up,vbs_zepvvJes22Up,bdt_vbfincJes22Up[0],mll{0},ngood_jetsJes22Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes23Up      [x] = dfwzbvbscatJes23Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes23Up,vbs_detajjJes23Up,vbs_dphijjJes23Up,vbs_zepvvJes23Up,bdt_vbfincJes23Up[0],mll{0},ngood_jetsJes23Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes24Up      [x] = dfwzbvbscatJes24Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes24Up,vbs_detajjJes24Up,vbs_dphijjJes24Up,vbs_zepvvJes24Up,bdt_vbfincJes24Up[0],mll{0},ngood_jetsJes24Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes25Up      [x] = dfwzbvbscatJes25Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes25Up,vbs_detajjJes25Up,vbs_dphijjJes25Up,vbs_zepvvJes25Up,bdt_vbfincJes25Up[0],mll{0},ngood_jetsJes25Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes26Up      [x] = dfwzbvbscatJes26Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes26Up,vbs_detajjJes26Up,vbs_dphijjJes26Up,vbs_zepvvJes26Up,bdt_vbfincJes26Up[0],mll{0},ngood_jetsJes26Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJes27Up      [x] = dfwzbvbscatJes27Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes27Up,vbs_detajjJes27Up,vbs_dphijjJes27Up,vbs_zepvvJes27Up,bdt_vbfincJes27Up[0],mll{0},ngood_jetsJes27Up,{1})".format(altMass,varSel2))
-            dfwzbvbscatJerUp        [x] = dfwzbvbscatJerUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJerUp  ,vbs_detajjJerUp  ,vbs_dphijjJerUp  ,vbs_zepvvJerUp  ,bdt_vbfincJerUp  [0],mll{0},ngood_jetsJerUp  ,{1})".format(altMass,varSel2))
-            dfwzbvbscatJERUp        [x] = dfwzbvbscatJERUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj	 ,vbs_zepvv	  ,bdt_vbfinc	    [0],mll{0},ngood_jets	,{1})".format(altMass,varSel2))
-            dfwzbvbscatJESUp        [x] = dfwzbvbscatJESUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj	 ,vbs_zepvv	  ,bdt_vbfinc	    [0],mll{0},ngood_jets	,{1})".format(altMass,varSel2))
-            dfwzbvbscatUnclusteredUp[x] = dfwzbvbscatUnclusteredUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj	 ,vbs_zepvv	  ,bdt_vbfinc	    [0],mll{0},ngood_jets	,{1})".format(altMass,varSel2))
+            dfwzbvbscat             [x] = dfwzbvbscat             [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mll{0},ngood_jets,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatMuonMomUp    [x] = dfwzbvbscatMuonMomUp    [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllMuonMomUp,ngood_jets,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatElectronMomUp[x] = dfwzbvbscatElectronMomUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj,vbs_detajj,vbs_dphijj,vbs_zepvv,bdt_vbfinc[0],mllElectronMomUp,ngood_jets,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes00Up      [x] = dfwzbvbscatJes00Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes00Up,vbs_detajjJes00Up,vbs_dphijjJes00Up,vbs_zepvvJes00Up,bdt_vbfincJes00Up[0],mll{0},ngood_jetsJes00Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes01Up      [x] = dfwzbvbscatJes01Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes01Up,vbs_detajjJes01Up,vbs_dphijjJes01Up,vbs_zepvvJes01Up,bdt_vbfincJes01Up[0],mll{0},ngood_jetsJes01Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes02Up      [x] = dfwzbvbscatJes02Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes02Up,vbs_detajjJes02Up,vbs_dphijjJes02Up,vbs_zepvvJes02Up,bdt_vbfincJes02Up[0],mll{0},ngood_jetsJes02Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes03Up      [x] = dfwzbvbscatJes03Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes03Up,vbs_detajjJes03Up,vbs_dphijjJes03Up,vbs_zepvvJes03Up,bdt_vbfincJes03Up[0],mll{0},ngood_jetsJes03Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes04Up      [x] = dfwzbvbscatJes04Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes04Up,vbs_detajjJes04Up,vbs_dphijjJes04Up,vbs_zepvvJes04Up,bdt_vbfincJes04Up[0],mll{0},ngood_jetsJes04Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes05Up      [x] = dfwzbvbscatJes05Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes05Up,vbs_detajjJes05Up,vbs_dphijjJes05Up,vbs_zepvvJes05Up,bdt_vbfincJes05Up[0],mll{0},ngood_jetsJes05Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes06Up      [x] = dfwzbvbscatJes06Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes06Up,vbs_detajjJes06Up,vbs_dphijjJes06Up,vbs_zepvvJes06Up,bdt_vbfincJes06Up[0],mll{0},ngood_jetsJes06Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes07Up      [x] = dfwzbvbscatJes07Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes07Up,vbs_detajjJes07Up,vbs_dphijjJes07Up,vbs_zepvvJes07Up,bdt_vbfincJes07Up[0],mll{0},ngood_jetsJes07Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes08Up      [x] = dfwzbvbscatJes08Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes08Up,vbs_detajjJes08Up,vbs_dphijjJes08Up,vbs_zepvvJes08Up,bdt_vbfincJes08Up[0],mll{0},ngood_jetsJes08Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes09Up      [x] = dfwzbvbscatJes09Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes09Up,vbs_detajjJes09Up,vbs_dphijjJes09Up,vbs_zepvvJes09Up,bdt_vbfincJes09Up[0],mll{0},ngood_jetsJes09Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes10Up      [x] = dfwzbvbscatJes10Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes10Up,vbs_detajjJes10Up,vbs_dphijjJes10Up,vbs_zepvvJes10Up,bdt_vbfincJes10Up[0],mll{0},ngood_jetsJes10Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes11Up      [x] = dfwzbvbscatJes11Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes11Up,vbs_detajjJes11Up,vbs_dphijjJes11Up,vbs_zepvvJes11Up,bdt_vbfincJes11Up[0],mll{0},ngood_jetsJes11Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes12Up      [x] = dfwzbvbscatJes12Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes12Up,vbs_detajjJes12Up,vbs_dphijjJes12Up,vbs_zepvvJes12Up,bdt_vbfincJes12Up[0],mll{0},ngood_jetsJes12Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes13Up      [x] = dfwzbvbscatJes13Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes13Up,vbs_detajjJes13Up,vbs_dphijjJes13Up,vbs_zepvvJes13Up,bdt_vbfincJes13Up[0],mll{0},ngood_jetsJes13Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes14Up      [x] = dfwzbvbscatJes14Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes14Up,vbs_detajjJes14Up,vbs_dphijjJes14Up,vbs_zepvvJes14Up,bdt_vbfincJes14Up[0],mll{0},ngood_jetsJes14Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes15Up      [x] = dfwzbvbscatJes15Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes15Up,vbs_detajjJes15Up,vbs_dphijjJes15Up,vbs_zepvvJes15Up,bdt_vbfincJes15Up[0],mll{0},ngood_jetsJes15Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes16Up      [x] = dfwzbvbscatJes16Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes16Up,vbs_detajjJes16Up,vbs_dphijjJes16Up,vbs_zepvvJes16Up,bdt_vbfincJes16Up[0],mll{0},ngood_jetsJes16Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes17Up      [x] = dfwzbvbscatJes17Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes17Up,vbs_detajjJes17Up,vbs_dphijjJes17Up,vbs_zepvvJes17Up,bdt_vbfincJes17Up[0],mll{0},ngood_jetsJes17Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes18Up      [x] = dfwzbvbscatJes18Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes18Up,vbs_detajjJes18Up,vbs_dphijjJes18Up,vbs_zepvvJes18Up,bdt_vbfincJes18Up[0],mll{0},ngood_jetsJes18Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes19Up      [x] = dfwzbvbscatJes19Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes19Up,vbs_detajjJes19Up,vbs_dphijjJes19Up,vbs_zepvvJes19Up,bdt_vbfincJes19Up[0],mll{0},ngood_jetsJes19Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes20Up      [x] = dfwzbvbscatJes20Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes20Up,vbs_detajjJes20Up,vbs_dphijjJes20Up,vbs_zepvvJes20Up,bdt_vbfincJes20Up[0],mll{0},ngood_jetsJes20Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes21Up      [x] = dfwzbvbscatJes21Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes21Up,vbs_detajjJes21Up,vbs_dphijjJes21Up,vbs_zepvvJes21Up,bdt_vbfincJes21Up[0],mll{0},ngood_jetsJes21Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes22Up      [x] = dfwzbvbscatJes22Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes22Up,vbs_detajjJes22Up,vbs_dphijjJes22Up,vbs_zepvvJes22Up,bdt_vbfincJes22Up[0],mll{0},ngood_jetsJes22Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes23Up      [x] = dfwzbvbscatJes23Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes23Up,vbs_detajjJes23Up,vbs_dphijjJes23Up,vbs_zepvvJes23Up,bdt_vbfincJes23Up[0],mll{0},ngood_jetsJes23Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes24Up      [x] = dfwzbvbscatJes24Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes24Up,vbs_detajjJes24Up,vbs_dphijjJes24Up,vbs_zepvvJes24Up,bdt_vbfincJes24Up[0],mll{0},ngood_jetsJes24Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes25Up      [x] = dfwzbvbscatJes25Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes25Up,vbs_detajjJes25Up,vbs_dphijjJes25Up,vbs_zepvvJes25Up,bdt_vbfincJes25Up[0],mll{0},ngood_jetsJes25Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes26Up      [x] = dfwzbvbscatJes26Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes26Up,vbs_detajjJes26Up,vbs_dphijjJes26Up,vbs_zepvvJes26Up,bdt_vbfincJes26Up[0],mll{0},ngood_jetsJes26Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJes27Up      [x] = dfwzbvbscatJes27Up      [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJes27Up,vbs_detajjJes27Up,vbs_dphijjJes27Up,vbs_zepvvJes27Up,bdt_vbfincJes27Up[0],mll{0},ngood_jetsJes27Up,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJerUp        [x] = dfwzbvbscatJerUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjjJerUp  ,vbs_detajjJerUp  ,vbs_dphijjJerUp  ,vbs_zepvvJerUp  ,bdt_vbfincJerUp  [0],mll{0},ngood_jetsJerUp  ,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJERUp        [x] = dfwzbvbscatJERUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj	 ,vbs_zepvv	  ,bdt_vbfinc	    [0],mll{0},ngood_jets	,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatJESUp        [x] = dfwzbvbscatJESUp        [x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj	 ,vbs_zepvv	  ,bdt_vbfinc	    [0],mll{0},ngood_jets	,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
+            dfwzbvbscatUnclusteredUp[x] = dfwzbvbscatUnclusteredUp[x].Define("finalVar", "compute_jet_lepton_final_var(vbs_mjj       ,vbs_detajj       ,vbs_dphijj	 ,vbs_zepvv	  ,bdt_vbfinc	    [0],mll{0},ngood_jets	,M01{0},M1T{0},MT{0},vbs_rpt,{1})".format(altMass,varSel2))
 
 
             startF = 300
@@ -1345,42 +1387,68 @@ def analysis(df,count,category,weight,year,PDType,isData,whichJob,nTheoryReplica
                 histo2D[j][x].SetBinContent(histo2D[j][x].GetNbinsX()+1,i+1,0.0)
                 histo2D[j][x].SetBinError  (histo2D[j][x].GetNbinsX()+1,i+1,0.0)
 
-            if(x == plotCategory("kPlotEWKWZ") or (x == plotCategory("kPlotWZ") and versionDoEWKQCD == True)):
-                histo[j][plotCategory("kPlotEWKWZ")]  .SetBinError(1,0.0)
-                histo[j][plotCategory("kPlotSignal0")].SetBinError(1,0.0)
-                histo[j][plotCategory("kPlotSignal1")].SetBinError(1,0.0)
-                histo[j][plotCategory("kPlotSignal2")].SetBinError(1,0.0)
-                histo[j][plotCategory("kPlotSignal3")].SetBinError(1,0.0)
-                for i in range(histo[j][x].GetNbinsX()):
-                    histo[j][plotCategory("kPlotEWKWZ")]  .SetBinContent(i+1,	     histo[j][plotCategory("kPlotEWKWZ")]  .GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,1))
-                    histo[j][plotCategory("kPlotEWKWZ")]  .SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotEWKWZ")]  .GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
+#            if(x == plotCategory("kPlotEWKWZ") or (x == plotCategory("kPlotWZ") and versionDoEWKQCD == True)):
+#                histo[j][plotCategory("kPlotEWKWZ")]  .SetBinError(1,0.0)
+#               histo[j][plotCategory("kPlotSignal0")].SetBinError(1,0.0)
+#                histo[j][plotCategory("kPlotSignal1")].SetBinError(1,0.0)
+#                histo[j][plotCategory("kPlotSignal2")].SetBinError(1,0.0)
+#                histo[j][plotCategory("kPlotSignal3")].SetBinError(1,0.0)
+#                for i in range(histo[j][x].GetNbinsX()):
+#                    histo[j][plotCategory("kPlotEWKWZ")]  .SetBinContent(i+1,	     histo[j][plotCategory("kPlotEWKWZ")]  .GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,1))
+#                    histo[j][plotCategory("kPlotEWKWZ")]  .SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotEWKWZ")]  .GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
+#
+#                    histo[j][plotCategory("kPlotSignal0")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal0")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,2))
+#                    histo[j][plotCategory("kPlotSignal0")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal0")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,2),2),0.5))
+#
+#                    histo[j][plotCategory("kPlotSignal1")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal1")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,3))
+ #                   histo[j][plotCategory("kPlotSignal1")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal1")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,3),2),0.5))
+#
+ #                   histo[j][plotCategory("kPlotSignal2")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal2")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,4))
+#                  histo[j][plotCategory("kPlotSignal2")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal2")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,4),2),0.5))
 
-                    histo[j][plotCategory("kPlotSignal0")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal0")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,2))
-                    histo[j][plotCategory("kPlotSignal0")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal0")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,2),2),0.5))
+#                    histo[j][plotCategory("kPlotSignal3")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal3")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,5))
+#                    histo[j][plotCategory("kPlotSignal3")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal3")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,5),2),0.5))
 
-                    histo[j][plotCategory("kPlotSignal1")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal1")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,3))
-                    histo[j][plotCategory("kPlotSignal1")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal1")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,3),2),0.5))
-
-                    histo[j][plotCategory("kPlotSignal2")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal2")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,4))
-                    histo[j][plotCategory("kPlotSignal2")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal2")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,4),2),0.5))
-
-                    histo[j][plotCategory("kPlotSignal3")].SetBinContent(i+1,	     histo[j][plotCategory("kPlotSignal3")].GetBinContent(i+1)+       histo2D[j][x].GetBinContent(i+1,5))
-                    histo[j][plotCategory("kPlotSignal3")].SetBinError  (i+1,pow(pow(histo[j][plotCategory("kPlotSignal3")].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,5),2),0.5))
-
-            else:
-                for i in range(histo[j][x].GetNbinsX()):
-                    histo[j][x].SetBinContent(i+1,	  histo[j][x].GetBinContent(i+1)+	histo2D[j][x].GetBinContent(i+1,1))
-                    histo[j][x].SetBinError  (i+1,pow(pow(histo[j][x].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
-
-    myfile = ROOT.TFile("fillhisto_wzAnalysis_sample{0}_year{1}_job{2}.root".format(count,year,whichJob),'RECREATE')
+ #           else:
+            for i in range(histo[j][x].GetNbinsX()):
+                histo[j][x].SetBinContent(i+1,	  histo[j][x].GetBinContent(i+1)+	histo2D[j][x].GetBinContent(i+1,1))
+                histo[j][x].SetBinError  (i+1,pow(pow(histo[j][x].GetBinError  (i+1),2)+pow(histo2D[j][x].GetBinError  (i+1,1),2),0.5))
+    outout_dir2 = "/mnt/home/mghimiray/VBSStudies/Outputs_EFT/fakerratewz/{0}/{1}/histo/fillhisto_wzAnalysis/".format(dirT2, cutOff)
+    os.makedirs(outout_dir2, exist_ok=True)
+    
+    output_file = "{3}/fillhisto_wzAnalysis{4}_sample{0}_year{1}_job{2}.root".format(
+        count, year, whichJob, outout_dir2, dirT2
+    )
+    
+    myfile = ROOT.TFile(output_file, "RECREATE")
+    
+    if myfile.IsZombie():
+        raise RuntimeError("Could not create output ROOT file: {}".format(output_file))
+    
     for i in range(nCat):
         for j in range(nHisto):
-            if(histo[j][i] == 0): continue
+            if histo[j][i] == 0:
+                continue
             histo[j][i].Write()
+    
     for i in range(nhistoNonPrompt):
-        if(histoNonPrompt[i] == 0): continue
+        if histoNonPrompt[i] == 0:
+            continue
         histoNonPrompt[i].Write()
+    
+    myfile.Write()
     myfile.Close()
+    
+    print("Output file:", output_file)
+    print("Output directory:", os.path.dirname(output_file))
+    
+    if os.path.exists(output_file):
+        size_mb = os.path.getsize(output_file) / 1024 / 1024
+        print("file exists")
+        print("file size: {:.3f} MB".format(size_mb))
+    else:
+        print("output file: No")
+        
 
 def readMCSample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3):
 
@@ -1501,17 +1569,23 @@ def readDASample(sampleNOW,year,skimType,whichJob,group,ewkCorrWeights,wsWeights
 
 if __name__ == "__main__":
 
-    group = 2
+    group = 4
 
     skimType = "3l"
     year = 2022
     process = -1
     whichJob = -1
+    cutOff=1500
+    makeDataCards = 1
 
-    valid = ['year=', "process=", 'whichJob=', 'help']
+    # 30 mT
+
+    valid = ['year=', "process=", 'whichJob=', 'cutOff=', 'makeDataCards=', 'help']
     usage  =  "Usage: ana.py --year=<{0}>\n".format(year)
     usage +=  "              --process=<{0}>\n".format(process)
     usage +=  "              --whichJob=<{0}>".format(whichJob)
+    usage +=  "              --cutOff=<{0}>".format(cutOff)
+    usage +=  "              --makeDataCards=<{0}>".format(makeDataCards)
     try:
         opts, args = getopt.getopt(sys.argv[1:], "", valid)
     except getopt.GetoptError as ex:
@@ -1529,7 +1603,14 @@ if __name__ == "__main__":
             process = int(arg)
         if opt == "--whichJob":
             whichJob = int(arg)
-
+        if opt == "--cutOff":
+            cutOff = str(arg).zfill(4)
+        if opt == "--makeDataCards":
+            makeDataCards = int(arg)
+    
+    dirT2 = "{0}".format(1000 + makeDataCards)
+    
+    if(makeDataCards >= 3): jetEtaCut = 4.7
     ewkCorrWeights = []
     ewkCorrPath = "data/VV_NLO_LO_CMS_mjj.root"
     fewkCorrFile = ROOT.TFile(ewkCorrPath)
@@ -1643,9 +1724,9 @@ if __name__ == "__main__":
     fBTVEffPathFile.Close()
 
     try:
-        if(process >= 0 and process < 1000):
+        if(process >= 0 and process < 1000) or (process >= 1900):
             readMCSample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3)
-        elif(process >= 1000):
+        elif(process >= 1000 and process < 1900):
             readDASample(process,year,skimType,whichJob,group,ewkCorrWeights,wsWeights,puWeights,histoBTVEffEtaPtLF,histoBTVEffEtaPtCJ,histoBTVEffEtaPtBJ,histoFakeEtaPt_mu,histoFakeEtaPt_el,histoLepSFEtaPt_mu,histoLepSFEtaPt_el,histoTriggerSFEtaPt_0_0,histoTriggerSFEtaPt_0_1,histoTriggerSFEtaPt_0_2,histoTriggerSFEtaPt_0_3,histoTriggerSFEtaPt_1_0,histoTriggerSFEtaPt_1_1,histoTriggerSFEtaPt_1_2,histoTriggerSFEtaPt_1_3,histoTriggerSFEtaPt_2_0,histoTriggerSFEtaPt_2_1,histoTriggerSFEtaPt_2_2,histoTriggerSFEtaPt_2_3,histoTriggerSFEtaPt_3_0,histoTriggerSFEtaPt_3_1,histoTriggerSFEtaPt_3_2,histoTriggerSFEtaPt_3_3)
     except Exception as e:
         print("FAILED {0}".format(e))

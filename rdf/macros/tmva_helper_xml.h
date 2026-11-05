@@ -2,10 +2,12 @@ class tmva_xml {
 
     public:
         tmva_xml(const std::string &filename) {
+            
 
             auto c = TMVA::Experimental::Internal::ParseXMLConfig(filename);
 			fVariables = c.variables;
-			fExpressions = c.expressions;
+    //        fExpressions = c.variables;   // Trying new expression.
+			fExpressions = c.variable_expressions;   //Monika change to c.variable_expressions for newer ROOT
 			fAnalysisType = c.analysisType;
 			fNumClasses = c.numClasses;
 
@@ -19,7 +21,7 @@ class tmva_xml {
             fReader->BookMVA(name, filename.c_str());
 
         }
-
+//        using Vec_f = std::vector<float>;  //monika added line
         std::vector<float> Compute(const Vec_f &x) {
 
             if (x.size() != fVariables.size())
@@ -63,7 +65,7 @@ class tmva_xml {
 class tmva_helper_xml {
     public:
         tmva_helper_xml(const std::string &filename, const unsigned int nslots = 1) {
-
+            
             const unsigned int nslots_actual = std::max(nslots, 1U);
 
 			for (unsigned int islot = 0; islot < nslots_actual; ++islot) {
@@ -71,7 +73,7 @@ class tmva_helper_xml {
                 interpreters_.emplace_back(tmp);
             }
         }
-
+ //       using Vec_f = std::vector<float>;   //Monika added line
         std::vector<float> operator()(unsigned int slot, const Vec_f vars) {
 			return interpreters_[slot]->Compute(vars);
         }

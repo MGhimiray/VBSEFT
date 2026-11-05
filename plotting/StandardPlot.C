@@ -15,15 +15,41 @@
 #include "TPaveText.h"
 #endif
 
+extern double gEFTLegendCoeff;
+extern bool gUseEFTLegendCoeff;
+
 Bool_t isBSMOverlaid = true;
 
-//float xPos[nPlotCategories] = {0.70,0.70,0.70,0.70,0.70,0.70,0.70,0.40,0.40,0.40,0.40,0.40,0.40,0.40,0.40};
-float xPos[nPlotCategories] = {0.61,0.61,0.61,0.61,0.61,0.61,0.61,0.33,0.33,0.33,0.33,0.33,0.33,0.33,0.33};
-float yOff[nPlotCategories] = {   0,	1,   2,   3,   4,  5,   6,   0,   1,   2,   3,   4,   5,   6,   7};
+const Float_t _tsize   = 0.035;
+const Float_t _xoffset = 0.170;
+const Float_t _yoffset = 0.041;
 
-const Float_t _tsize   = 0.050; 
-const Float_t _xoffset = 0.280;
-const Float_t _yoffset = 0.060;
+//------------------------------------------------------------------------------
+// GetLegendXY
+//------------------------------------------------------------------------------
+
+void GetLegendXY(size_t index,
+                 Float_t &x,
+                 Float_t &y,
+                 Float_t extraXOffset = 0.0,
+                 Float_t yScale = 1.0)
+{
+    const Int_t entriesPerColumn = 8;
+    // First 8 entries are put in the right column.
+    const Float_t xStart = 0.72;
+    const Float_t xStep  = -0.34;
+    const Float_t xMin   = 0.14;
+    const Float_t yTop   = 0.84;
+
+    Int_t column = index / entriesPerColumn;
+    Int_t row    = index % entriesPerColumn;
+
+    x = xStart + column * xStep;
+    if (x < xMin) x = xMin;
+    x += extraXOffset;
+
+    y = yTop - row * _yoffset * yScale;
+}
 
 const double SFBinWidth = 1;
 
@@ -38,7 +64,7 @@ Float_t GetMaximumIncludingErrors(TH1F* h, bool doApplyBinWidth)
 
         Float_t binHeight = h->GetBinContent(i) + h->GetBinError(i);
 
-        if(doApplyBinWidth) binHeight = h->GetBinContent(i) + h->GetBinError(i)/h->GetBinWidth(i);
+        if(doApplyBinWidth) binHeight = binHeight/h->GetBinWidth(i)*SFBinWidth;
 
         if (binHeight > maxWithErrors) maxWithErrors = binHeight;
     }
@@ -57,7 +83,7 @@ Float_t GetMinimumIncludingErrors(TH1F* h, bool doApplyBinWidth)
 
         Float_t binHeight = h->GetBinContent(i) + h->GetBinError(i);
 
-        if(doApplyBinWidth) binHeight = h->GetBinContent(i) + h->GetBinError(i)/h->GetBinWidth(i);
+        if(doApplyBinWidth) binHeight = binHeight/h->GetBinWidth(i)*SFBinWidth;
 
         if (binHeight < minWithErrors) minWithErrors = binHeight;
     }
@@ -79,8 +105,8 @@ void AxisFonts(TAxis*  axis,
     axis->SetLabelSize  (0.045);
     axis->SetNdivisions (  505);
     axis->SetTitleFont  (   42);
-    axis->SetTitleOffset(  2.0);
-    axis->SetTitleSize  (0.055);
+    axis->SetTitleOffset(  0.9);
+    axis->SetTitleSize  (0.050);
 
     if      (coordinate == "y" && doApplyBinWidth == true) axis->SetTitleOffset(0.9);
     else if (coordinate == "y")                            axis->SetTitleOffset(0.9);
@@ -120,6 +146,7 @@ void DrawLegend(Float_t x1,
 
     legend->SetBorderSize  (     0);
     legend->SetFillColor   (     0);
+    legend->SetFillStyle   (     0);
     legend->SetTextAlign   (    12);
     legend->SetTextFont    (    42);
     legend->SetTextSize    (_tsize);
@@ -131,26 +158,66 @@ void DrawLegend(Float_t x1,
 }
 
 void DrawLegendTG(Float_t x1,
-        Float_t y1,
-        TGraph  *hist,
-        TString label,
-        TString option)
+                  Float_t y1,
+                  TGraph  *hist,
+                  TString label,
+                  TString option)
 {
-    TLegend* legend = new TLegend(x1,
-            y1,
-            x1 + _xoffset,
-            y1 + _yoffset);
+  TLegend* legend = new TLegend(x1,
+                                y1,
+                                x1 + _xoffset,
+                                y1 + _yoffset);
 
-    legend->SetBorderSize(     0);
-    legend->SetFillColor (     0);
-    legend->SetTextAlign (    12);
-    legend->SetTextFont  (    42);
-    legend->SetTextSize  (_tsize);
+  legend->SetBorderSize(     0);
+  legend->SetFillColor (     0);
+  legend->SetFillStyle (     0);
+  legend->SetTextAlign (    12);
+  legend->SetTextFont  (    42);
+  legend->SetTextSize  (_tsize);
 
-    legend->AddEntry(hist, label.Data(), option.Data());
+  legend->AddEntry(hist, label.Data(), option.Data());
 
-    legend->Draw();
+  legend->Draw();
 }
+
+bool isEFTCategoryForOverlay(int ic)
+{
+  return (
+    ic == kPlotEFTM0Int  || ic == kPlotEFTM0Quad ||
+    ic == kPlotEFTM1Int  || ic == kPlotEFTM1Quad ||
+    ic == kPlotEFTM7Int  || ic == kPlotEFTM7Quad ||
+    ic == kPlotEFTS0Int  || ic == kPlotEFTS0Quad ||
+    ic == kPlotEFTT0Int  || ic == kPlotEFTT0Quad ||
+    ic == kPlotEFTT1Int  || ic == kPlotEFTT1Quad ||
+    ic == kPlotEFTT2Int  || ic == kPlotEFTT2Quad ||
+    ic == kPlotEFTM2QuadWZ || ic == kPlotEFTM3QuadWZ || 
+    ic == kPlotEFTM4QuadWZ || ic == kPlotEFTM5QuadWZ ||
+    ic == kPlotEFTT5QuadWZ || ic == kPlotEFTT6QuadWZ || 
+    ic == kPlotEFTT7QuadWZ || ic == kPlotEFTM2IntWZ  || 
+    ic == kPlotEFTM3IntWZ  || ic == kPlotEFTM4IntWZ  || 
+    ic == kPlotEFTM5IntWZ  || ic == kPlotEFTT5IntWZ  ||
+    ic == kPlotEFTT6IntWZ  || ic == kPlotEFTT7IntWZ
+  );
+}
+
+TString cleanUnitsForDisplay(TString units)
+{
+  TString u = units;
+  TString U = units;
+  U.ToUpper();
+
+  // If there is a real GeV unit, keep only GeV
+  if(U.Contains("GEV")) return "GeV";
+
+  // If this is only a plotting/control tag, show no unit
+  if(U.Contains("EFT")) return "";
+
+  // Preserve BIN logic if you use it elsewhere
+  if(U.Contains("BIN")) return "BIN";
+
+  return u;
+}
+
 
 class StandardPlot {
 
@@ -207,6 +274,7 @@ class StandardPlot {
                 }
 
                 // signal gets overlaid
+                if (isEFTCategoryForOverlay(ic) && isBSMOverlaid == true) continue;
                 if (ic == kPlotBSM && isBSMOverlaid == false) continue;
                 if (ic == kPlotSignal0 && isBSMOverlaid == false) continue;
                 if (ic == kPlotSignal1 && isBSMOverlaid == false) continue;
@@ -219,20 +287,28 @@ class StandardPlot {
                 hstack->Add(_hist[ic]);
 		hSum  ->Add(_hist[ic]);
             }
-            if(_hist_total) {
-              if(_hist_total->GetBinContent(1) > 0 && _hist_total->GetBinError(1)/_hist_total->GetBinContent(1) > 1.5) _hist_total->SetBinError(1,_hist_total->GetBinContent(1)*0.1);
-              TH1D* hist_total_aux = (TH1D*)_hist_total->Clone();
-              if(_doApplyBinWidth == true){
-                hist_total_aux->Scale(1,"width");
+            if(_hist_total) for(int i=1; i<=_hist_total->GetNbinsX(); i++) {hSum->SetBinError(i,_hist_total->GetBinError(i));}
+            
+            for(int ic=0; ic<nPlotCategories; ic++){
+              if(_hist[ic] && isEFTCategoryForOverlay(ic)){
+                _hist[ic]->SetFillColor(0);
+                _hist[ic]->SetFillStyle(0);
+                _hist[ic]->SetLineWidth(4);
+                _hist[ic]->SetLineColor(plotColors[ic]);
+            
+                if(plotBaseNames[ic].Contains("Int"))
+                  _hist[ic]->SetLineStyle(2);   // dashed interference
+            
+                if(plotBaseNames[ic].Contains("Quad"))
+                  _hist[ic]->SetLineStyle(1);   // solid quadratic
               }
-              for(int i=1; i<=hist_total_aux->GetNbinsX(); i++) {hSum->SetBinError(i,hist_total_aux->GetBinError(i));}
             }
-
             if(_hist[kPlotBSM]    ) _hist[kPlotBSM    ]->SetLineWidth(4);
             if(_hist[kPlotSignal0]) _hist[kPlotSignal0]->SetLineWidth(4);
             if(_hist[kPlotSignal1]) _hist[kPlotSignal1]->SetLineWidth(4);
             if(_hist[kPlotSignal2]) _hist[kPlotSignal2]->SetLineWidth(4);
             if(_hist[kPlotSignal3]) _hist[kPlotSignal3]->SetLineWidth(4);
+            
 
             if(_hist[kPlotBSM]    ) _hist[kPlotBSM    ]->SetFillColor(0);
             if(_hist[kPlotSignal0]) _hist[kPlotSignal0]->SetFillColor(0);
@@ -277,7 +353,13 @@ class StandardPlot {
               //TExec *setex1 = new TExec("setex1","gStyle->SetErrorX(0)");
               //setex1->Draw();
 	    }
-
+            if(isBSMOverlaid == true){
+             for(int ic=0; ic<nPlotCategories; ic++){
+               if(_hist[ic] && isEFTCategoryForOverlay(ic)){
+                 _hist[ic]->Draw("hist,same");
+               }
+             }
+}           
             if(_hist[kPlotBSM    ] && isBSMOverlaid == false) _hist[kPlotBSM    ]->Draw("hist,same");
             if(_hist[kPlotSignal0] && isBSMOverlaid == false) _hist[kPlotSignal0]->Draw("hist,same");
             if(_hist[kPlotSignal1] && isBSMOverlaid == false) _hist[kPlotSignal1]->Draw("hist,same");
@@ -352,6 +434,17 @@ class StandardPlot {
             Float_t theMax = hstack->GetMaximum();
             Float_t theMin = hstack->GetMinimum();
 
+            for(int ic=0; ic<nPlotCategories; ic++){
+                if(_hist[ic] && isEFTCategoryForOverlay(ic)){
+              
+                  if(_hist[ic]->GetMaximum() > theMax)
+                    theMax = _hist[ic]->GetMaximum();
+              
+                  if(_hist[ic]->GetMinimum() < theMin)
+                    theMin = _hist[ic]->GetMinimum();
+                }
+              }
+
             if (_hist[kPlotBSM]) {
                 if (_hist[kPlotBSM]->GetMaximum() > theMax) theMax = _hist[kPlotBSM]->GetMaximum();
                 if (_hist[kPlotBSM]->GetMinimum() < theMin) theMin = _hist[kPlotBSM]->GetMinimum();
@@ -395,16 +488,14 @@ class StandardPlot {
             } else {
                 if(_units.Sizeof() == 1) {
                     THStackAxisFonts(hstack, "x", _xLabel.Data(), _doApplyBinWidth);
-                    //THStackAxisFonts(hstack, "y", "Events / bin", _doApplyBinWidth);
-                    if     (_doApplyBinWidth == true && SFBinWidth == 1) THStackAxisFonts(hstack, "y", "Events / 1", _doApplyBinWidth);
-                    else if(_doApplyBinWidth == true)			 THStackAxisFonts(hstack, "y", Form("Events / %.1f",SFBinWidth), _doApplyBinWidth);
-                    else						 THStackAxisFonts(hstack, "y", "Events / bin", _doApplyBinWidth);
+                    if     (_doApplyBinWidth == true && SFBinWidth == 1) THStackAxisFonts(hstack, "y", "Events / GeV", _doApplyBinWidth);
+                    else if(_doApplyBinWidth == true)                    THStackAxisFonts(hstack, "y", Form("Events / %.2f",SFBinWidth), _doApplyBinWidth);
+                    else                                                 THStackAxisFonts(hstack, "y", "Events / bin", _doApplyBinWidth);
                 } else {
 		    if(_units.EndsWith("BIN") == false){
                       THStackAxisFonts(hstack, "x", TString::Format("%s [%s]",_xLabel.Data(),_units.Data()), _doApplyBinWidth);
-                      if     (_doApplyBinWidth == true && SFBinWidth == 1) THStackAxisFonts(hstack, "y", "Events / GeV", _doApplyBinWidth);
-                      else if(_doApplyBinWidth == true)                    THStackAxisFonts(hstack, "y", Form("Events / %.1f GeV",SFBinWidth), _doApplyBinWidth);
-                      else                                                 THStackAxisFonts(hstack, "y", "Events / bin", _doApplyBinWidth);
+                      if(hSum->GetBinWidth(0) < 1) THStackAxisFonts(hstack, "y", TString::Format("Events / %.1f %s",hSum->GetBinWidth(0),_units.Data()), _doApplyBinWidth);
+		      else                         THStackAxisFonts(hstack, "y", TString::Format("Events / %.0f %s",hSum->GetBinWidth(0),_units.Data()), _doApplyBinWidth);
                     }
 		    else {
 		      _units = _units.ReplaceAll("BIN","");
@@ -418,39 +509,134 @@ class StandardPlot {
             }
 
             size_t j=0;
+            Float_t lx = 0.0;
+            Float_t ly = 0.0;
             TString higgsLabel  = Form("%s",_HiggsLabel.Data());
             TString higgs2Label = Form("%s",_Higgs2Label.Data());
             bool isThereSignal = false;
 
             for (int ic=0; ic<nPlotCategories; ic++) {
-	      if     (ic==kPlotData){
-	        if(_hist[ic] && _hist[ic]->GetSumOfWeights() > 0) { DrawLegend(xPos[j], 0.81 - yOff[j]*_yoffset, _hist[ic], plotNames[ic].Data(), "ep"); j++;}
-                if(plotSystErrorBars == true) {DrawLegendTG(xPos[j], 0.81 - yOff[j]*_yoffset,gsyst, "Total unc.",  "f" ); j++;isThereSignal = true;}
+
+              if(ic == kPlotData){
+                if(_hist[ic] && _hist[ic]->GetSumOfWeights() > 0) {
+                  GetLegendXY(j, lx, ly);
+                  DrawLegend(lx, ly, _hist[ic], plotNames[ic].Data(), "ep");
+                  j++;
+                }
+                if(plotSystErrorBars == true) {
+                  GetLegendXY(j, lx, ly);
+                  DrawLegendTG(lx, ly, gsyst, "Total unc.", "f");
+                  j++;
+                  isThereSignal = true;
+                }
               }
-	      else if(ic == kPlotBSM){
-	        double furtherXOffSet = 0.0;
-		if(higgsLabel.Contains("m_{H},m_{a}")) furtherXOffSet = -0.05;
-		if(higgsLabel.Contains("Z(ll)h_{125}")) furtherXOffSet = -0.05;
-                if     (_hist[ic] && isBSMOverlaid) { DrawLegend(xPos[j]+furtherXOffSet, 0.81 - yOff[j]*_yoffset, _hist[ic], higgsLabel, "f" ); j++; }
-                else if(_hist[ic])		    { DrawLegend(xPos[j]+furtherXOffSet, 0.81 - yOff[j]*_yoffset, _hist[ic], higgsLabel, "l" ); j++; }
-	      }
-	      else if(ic == kPlotSignal0){
-	        double furtherXOffSet = 0.0;
-		if(higgs2Label.Contains("ADD")) furtherXOffSet = -0.05;
-                if     (_hist[ic] && isBSMOverlaid) { DrawLegend(xPos[j]+furtherXOffSet, 0.81 - yOff[j]*_yoffset*1.15, _hist[ic], higgs2Label, "f" ); j++; }
-                else if(_hist[ic])		    { DrawLegend(xPos[j]+furtherXOffSet, 0.81 - yOff[j]*_yoffset*1.15, _hist[ic], higgs2Label, "l" ); j++; }
-	      }
-	      else if(ic == kPlotSignal1 || ic == kPlotSignal2 || ic == kPlotSignal3){
-                if     (_hist[ic] && isBSMOverlaid) { DrawLegend(xPos[j], 0.81 - yOff[j]*_yoffset*1.09, _hist[ic], plotNames[ic].Data(), "f" ); j++; }
-                else if(_hist[ic])		    { DrawLegend(xPos[j], 0.81 - yOff[j]*_yoffset*1.09, _hist[ic], plotNames[ic].Data(), "l" ); j++; }
-	      }
-	      else {
-	        if(_hist[ic] && _hist[ic]->GetSumOfWeights() > 0) { DrawLegend(xPos[j], 0.81 - yOff[j]*_yoffset, _hist[ic], plotNames[ic].Data(), "f"); j++;}
-	      }
-	    }
 
-            if(plotSystErrorBars == true && isThereSignal == false) {DrawLegendTG(xPos[j], 0.81 - yOff[j]*_yoffset,gsyst, "Total unc.",  "f" ); j++;}
+              else if(isEFTCategoryForOverlay(ic)){
+                if(_hist[ic] && isBSMOverlaid == true) {
 
+                  TString eftLabel = plotNames[ic];
+
+                  TString coeffText = "";
+                  if(gUseEFTLegendCoeff){
+                    coeffText = Form(" = %.3g TeV^{-4}", gEFTLegendCoeff);
+                  }
+
+                  if(ic == kPlotEFTM0Int)  eftLabel = Form("f_{M0} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTM0Quad) eftLabel = Form("f_{M0} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTM1Int)  eftLabel = Form("f_{M1} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTM1Quad) eftLabel = Form("f_{M1} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTM7Int)  eftLabel = Form("f_{M7} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTM7Quad) eftLabel = Form("f_{M7} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTS0Int)  eftLabel = Form("f_{S0} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTS0Quad) eftLabel = Form("f_{S0} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTT0Int)  eftLabel = Form("f_{T0} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTT0Quad) eftLabel = Form("f_{T0} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTT1Int)  eftLabel = Form("f_{T1} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTT1Quad) eftLabel = Form("f_{T1} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTT2Int)  eftLabel = Form("f_{T2} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTT2Quad) eftLabel = Form("f_{T2} Quad.%s", coeffText.Data());
+
+                  if(ic == kPlotEFTM2QuadWZ) eftLabel = Form("f_{M2} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTM3QuadWZ) eftLabel = Form("f_{M3} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTM4QuadWZ) eftLabel = Form("f_{M4} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTM5QuadWZ) eftLabel = Form("f_{M5} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTT5QuadWZ) eftLabel = Form("f_{T5} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTT6QuadWZ) eftLabel = Form("f_{T6} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTT7QuadWZ) eftLabel = Form("f_{T7} Quad.%s", coeffText.Data());
+                  if(ic == kPlotEFTM2IntWZ)  eftLabel = Form("f_{M2} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTM3IntWZ)  eftLabel = Form("f_{M3} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTM4IntWZ)  eftLabel = Form("f_{M4} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTM5IntWZ)  eftLabel = Form("f_{M5} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTT5IntWZ)  eftLabel = Form("f_{T5} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTT6IntWZ)  eftLabel = Form("f_{T6} Int.%s",  coeffText.Data());
+                  if(ic == kPlotEFTT7IntWZ)  eftLabel = Form("f_{T7} Int.%s",  coeffText.Data());
+
+                  GetLegendXY(j, lx, ly);
+                  DrawLegend(lx, ly, _hist[ic], eftLabel, "l");
+                  j++;
+                }
+              }
+
+              else if(ic == kPlotBSM){
+                double furtherXOffSet = 0.0;
+                if(higgsLabel.Contains("m_{H},m_{a}"))   furtherXOffSet = -0.05;
+                if(higgsLabel.Contains("Z(ll)h_{125}"))  furtherXOffSet = -0.05;
+
+                if(_hist[ic] && isBSMOverlaid) {
+                  GetLegendXY(j, lx, ly, furtherXOffSet);
+                  DrawLegend(lx, ly, _hist[ic], higgsLabel, "f");
+                  j++;
+                }
+                else if(_hist[ic]) {
+                  GetLegendXY(j, lx, ly, furtherXOffSet);
+                  DrawLegend(lx, ly, _hist[ic], higgsLabel, "l");
+                  j++;
+                }
+              }
+
+              else if(ic == kPlotSignal0){
+                double furtherXOffSet = 0.0;
+                if(higgs2Label.Contains("ADD")) furtherXOffSet = -0.05;
+
+                if(_hist[ic] && isBSMOverlaid) {
+                  GetLegendXY(j, lx, ly, furtherXOffSet, 1.15);
+                  DrawLegend(lx, ly, _hist[ic], higgs2Label, "f");
+                  j++;
+                }
+                else if(_hist[ic]) {
+                  GetLegendXY(j, lx, ly, furtherXOffSet, 1.15);
+                  DrawLegend(lx, ly, _hist[ic], higgs2Label, "l");
+                  j++;
+                }
+              }
+
+              else if(ic == kPlotSignal1 || ic == kPlotSignal2 || ic == kPlotSignal3){
+                if(_hist[ic] && isBSMOverlaid) {
+                  GetLegendXY(j, lx, ly, 0.0, 1.09);
+                  DrawLegend(lx, ly, _hist[ic], plotNames[ic].Data(), "f");
+                  j++;
+                }
+                else if(_hist[ic]) {
+                  GetLegendXY(j, lx, ly, 0.0, 1.09);
+                  DrawLegend(lx, ly, _hist[ic], plotNames[ic].Data(), "l");
+                  j++;
+                }
+              }
+
+              else {
+                if(_hist[ic] && _hist[ic]->GetSumOfWeights() > 0) {
+                  GetLegendXY(j, lx, ly);
+                  DrawLegend(lx, ly, _hist[ic], plotNames[ic].Data(), "f");
+                  j++;
+                }
+              }
+            }
+
+            if(plotSystErrorBars == true && isThereSignal == false) {
+              GetLegendXY(j, lx, ly);
+              DrawLegendTG(lx, ly, gsyst, "Total unc.", "f");
+              j++;
+            }
             //TLatex* luminosity = new TLatex(0.9, 0.8, TString::Format("L = %.1f fb^{-1}",_lumi));
             //luminosity->SetNDC();
             //luminosity->SetTextAlign(32);
@@ -464,13 +650,15 @@ class StandardPlot {
         void setDoApplyBinWidth(const bool &b) {_doApplyBinWidth = b; }
         void setLumi(const float &l) { _lumi = l; }
         void setLabel(const TString &s) { _xLabel = s; }
-        void setUnits(const TString &s) { _units = s; }
+        void setUnits(const TString &s) {
+              _units = cleanUnitsForDisplay(s);
+            }
         void setBreakdown(const bool &b = true) { _breakdown = b; }
         void addLabel(const std::string &s) {
             _extraLabel = new TLatex(0.216, 0.70, TString(s));
             _extraLabel->SetNDC();
             _extraLabel->SetTextAlign(13);
-            _extraLabel->SetTextFont(42);
+            _extraLabel->SetTextFont(62);
             _extraLabel->SetTextSize(0.055);
         }
 

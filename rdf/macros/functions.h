@@ -381,7 +381,8 @@ float compute_JSON_ELE_SFs(const int yearValue, std::string yearS, std::string v
     double pt_used = max(el_pt[i],10.001f);
     if     (pt_used < 20) recoNameAux = (char*)"RecoBelow20";
     else if(pt_used < 75) recoNameAux = (char*)"Reco20to75";
-    if(yearValue < 20210 && pt_used >= 20) recoNameAux = (char*)"RecoAbove20";
+    if     (yearValue <  20210 && pt_used >= 20) recoNameAux = (char*)"RecoAbove20";
+    else if(yearValue >= 20250 && pt_used  < 20) {recoNameAux = (char*)"Reco20to75"; pt_used = 20.001;}
     const char *recoName = recoNameAux;
     double sf0 = corrSFs.eval_electronTRKSF(year,valType0,    recoName,el_eta[i],pt_used,el_phi[i]);
     double sf1 = 1.0;
@@ -541,6 +542,8 @@ float compute_JSON_MET(const std::string pt_phiS, const std::string met_typeS, c
   else if(year == 20231) epoch = (char*)"2023BPix";
   else if(year == 20240) epoch = (char*)"2023BPix";
   else if(year == 20250) epoch = (char*)"2023BPix";
+  else if(year == 20260) epoch = (char*)"2023BPix";
+  else if(year == 20261) epoch = (char*)"2023BPix";
   const char *dtmc = dtmcS.c_str();
   const char *variation = variationS.c_str();
 
@@ -569,6 +572,8 @@ Vec_b cleaningJetVetoMapMask(const Vec_f& jet_eta, const Vec_f& jet_phi, int jet
   else if(jetTypeCorr == -1 && year == 20231) jetTypeCorr = 3;
   else if(jetTypeCorr == -1 && year == 20240) jetTypeCorr = 0;
   else if(jetTypeCorr == -1 && year == 20250) jetTypeCorr = 0;
+  else if(jetTypeCorr == -1 && year == 20260) jetTypeCorr = 0;
+  else if(jetTypeCorr == -1 && year == 20261) jetTypeCorr = 0;
   else if(jetTypeCorr == -1) return jet_vetoMap_mask;
 
   bool debug = false;
@@ -932,8 +937,8 @@ float compute_PTWWCorr(const int type, const TString theCat, const float ptww){
 }
 
 float compute_fakeRate(const bool isData,
-                       const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_jetRelIso, const Vec_i& tight_mu, const int mType,
-                       const Vec_f& el_pt, const Vec_f& el_eta, const Vec_f& el_jetRelIso, const Vec_i& tight_el, const int eType,
+                       const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_jetRelIso, const Vec_i& tight_mu, int mType,
+                       const Vec_f& el_pt, const Vec_f& el_eta, const Vec_f& el_jetRelIso, const Vec_i& tight_el, int eType,
                        const int whichAna){
 
   bool debug = false;
@@ -945,7 +950,8 @@ float compute_fakeRate(const bool isData,
   // def 2, unc 5 / 1 / 8
 
   double addSF[2] {1.0, 1.0};
-  if(whichAna == 1) {addSF[0] = 1.0; addSF[1] = 1.0;}
+  if(whichAna >= 10 && mType == -1 && mType == -1) {mType = whichAna - 10; eType = whichAna - 10;}
+  else if(mType == -1 || mType == -1) {printf("PROBLEM in compute_fakeRate\n");}
 
   if(mu_pt.size() != tight_mu.size() || el_pt.size() != tight_el.size()) {
     printf("PROBLEM in compute_fakeRate (%zu/%zu) (%zu/%zu)!\n",mu_pt.size(),tight_mu.size(),el_pt.size(),tight_el.size());
@@ -1163,7 +1169,7 @@ float compute_lumiFakeRate(const Vec_f& mu_pt, const Vec_f& el_pt, const int nTr
     lumiPrescalesE[1] =  70.5/109329.6;
     lumiPrescalesE[2] =  70.5/109329.6;
   }
-  else if(year == 20250){
+  else if(year == 20250 || year == 20260 || year == 20261){
     lumiPrescalesM[0] =  13.7/60261.0;
     lumiPrescalesM[1] = 369.7/60261.0;
     lumiPrescalesM[2] = 369.7/60261.0;
@@ -1518,19 +1524,20 @@ float compute_jet_x_gamma_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass,
   return theVar;
 }
 // Jet-lepton final variables
-float compute_jet_lepton_final_var(const float mjj, const float detajj, const float dphijj, const float zepvv, const float bdt_inc, const float mll, const int njets, unsigned int var, const float bdt_pol0 = -999.0, const float bdt_pol1 = -999.0)
+float compute_jet_lepton_final_var(const float mjj, const float detajj, const float dphijj, const float zepvv, const float bdt_inc, const float mll, const int njets, const float M01, const float M1T, const float MT, const float Rpt, unsigned int var)
 {
   if     (var < 10){
     int typeSelAux1 = -1;
-    if     (mjj <  900) typeSelAux1 = 0;
-    else if(mjj < 1300) typeSelAux1 = 1;
-    else if(mjj < 2000) typeSelAux1 = 2;
+    if     (mjj <  800) typeSelAux1 = 0;
+    else if(mjj < 1200) typeSelAux1 = 1;
+    else if(mjj < 1800) typeSelAux1 = 2;
     else                typeSelAux1 = 3;
   
     float typeSelAux2 = -1;
-    if     (mll <  80) typeSelAux2 = 0;
-    else if(mll < 140) typeSelAux2 = 1;
-    else if(mll < 220) typeSelAux2 = 2;
+    if     (mll < 150) typeSelAux2 = 0;
+    else if(mll < 300) typeSelAux2 = 1;
+    else if(mll < 450) typeSelAux2 = 2;
+    else if(mll < 600) typeSelAux2 = 3;
     else               typeSelAux2 = 3;
     
     float typeSelAux3 = -1;
@@ -1550,7 +1557,7 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
     else if(dphijj < 2.9) typeSelAux5 = 2;
     else                  typeSelAux5 = 3;
 
-    if     (var == 1 | var == 2){ // VBS W+W+ SR mjj - mll
+    if     (var == 1 || var == 2){ // VBS W+W+ SR mjj - mll
       return (float)(typeSelAux1+4*typeSelAux2);
     }
     else if(var == 3){ // VBS W+W+ SR mjj - njets
@@ -1586,9 +1593,9 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
   }
   else if(var == 10 || var == 11){
     int typeSelAux1 = -1;
-    if     (mjj <  900) typeSelAux1 = 0;
-    else if(mjj < 1300) typeSelAux1 = 1;
-    else if(mjj < 2000) typeSelAux1 = 2;
+    if     (mjj <  800) typeSelAux1 = 0;
+    else if(mjj < 1200) typeSelAux1 = 1;
+    else if(mjj < 1800) typeSelAux1 = 2;
     else                typeSelAux1 = 3;
   
     int typeSelAux2 = -1;
@@ -1621,83 +1628,229 @@ float compute_jet_lepton_final_var(const float mjj, const float detajj, const fl
   }
   else if(var == 14){ // VBS WZ SR MVA X mjj (2D)
     int typeSelAux1 = -1;
-    if     (mjj <  900) typeSelAux1 = 0;
-    else if(mjj < 1300) typeSelAux1 = 1;
-    else if(mjj < 2000) typeSelAux1 = 2;
+    if     (mjj <  800) typeSelAux1 = 0;
+    else if(mjj < 1200) typeSelAux1 = 1;
+    else if(mjj < 1800) typeSelAux1 = 2;
     else                typeSelAux1 = 3;
 
     float bdt_incNew = (std::min(std::max(bdt_inc+1.0,0.001),1.999)/2.0)+typeSelAux1;
 
     return (float)(bdt_incNew);
   }
-  else if(var == 31){ // VBS BDT pol v0 3D
-    float xBDT0Bins[3] = { 0.150, 0.680, 9.000};
-    //float xBDT1Bins[4] = {-0.180, 0.140, 0.460, 9.000}; // v8
-    //float xBDT2Bins[4] = {-0.040, 0.330, 0.580, 9.000}; // v8
-    //float xBDT1Bins[4] = {-0.190, 0.140, 0.450, 9.000}; // v7
-    //float xBDT2Bins[4] = {-0.050, 0.330, 0.580, 9.000}; // v7
-    float xBDT1Bins[4] = {-0.060, 0.210, 0.460, 9.000}; // v6
-    float xBDT2Bins[4] = {-0.000, 0.370, 0.610, 9.000}; // v6
 
-    int typeSelAux0 = -1;
-    if     (bdt_inc < xBDT0Bins[0]) typeSelAux0 = 0;
-    else if(bdt_inc < xBDT0Bins[1]) typeSelAux0 = 1;
-    else                            typeSelAux0 = 2;
+  else if(var >=30){
+      float typeSelAux6 = -1;
+    if     (M01 < 500 ) typeSelAux6 = 0;
+    else if(M01 < 750 ) typeSelAux6 = 1;
+    else if(M01 < 1000) typeSelAux6 = 2;
+    else if(M01 < 1100) typeSelAux6 = 3;
+    else if(M01 < 1200) typeSelAux6 = 4;
+    else if(M01 < 1300) typeSelAux6 = 5;
+    else if(M01 < 1400) typeSelAux6 = 6;
+    else if(M01 < 1500) typeSelAux6 = 7;
+    else                typeSelAux6 = 8;
 
-    int typeSelAux1 = -1;
-    if     (bdt_pol0 < xBDT1Bins[0]) typeSelAux1 = 0;
-    else if(bdt_pol0 < xBDT1Bins[1]) typeSelAux1 = 1;
-    else if(bdt_pol0 < xBDT1Bins[2]) typeSelAux1 = 2;
-    else                             typeSelAux1 = 3;
+    float typeSelAux7 = -1;
+    if     (M1T < 500 ) typeSelAux7 = 0;
+    else if(M1T < 750 ) typeSelAux7 = 1;
+    else if(M1T < 1000 ) typeSelAux7 = 2;
+    else if(M1T < 1100 ) typeSelAux7 = 3;
+    else if(M1T < 1200 ) typeSelAux7 = 4;
+    else if(M1T < 1300 ) typeSelAux7 = 5;
+    else if(M1T < 1400 ) typeSelAux7 = 6;
+    else if(M1T < 1500 ) typeSelAux7 = 7;
+    else                typeSelAux7 = 8;
 
-    int typeSelAux2 = -1;
-    if     (bdt_pol1 < xBDT2Bins[0]) typeSelAux2 = 0;
-    else if(bdt_pol1 < xBDT2Bins[1]) typeSelAux2 = 1;
-    else if(bdt_pol1 < xBDT2Bins[2]) typeSelAux2 = 2;
-    else                             typeSelAux2 = 3;
+    float typeSelAux8 = -1;
+    if     (MT < 350 ) typeSelAux8 = 0;
+    else if(MT < 650 ) typeSelAux8 = 1;
+    else if(MT < 850 ) typeSelAux8 = 2;
+    else if(MT < 1050 ) typeSelAux8 = 3;
+    else               typeSelAux8 = 4;
 
-    float typeSelAux = (float)(16*typeSelAux0 + 4*typeSelAux1 + typeSelAux2);
 
-    return (float)(typeSelAux);
+
+    int typeSelAux9 = -1;
+    if     (mjj <  800) typeSelAux9 = 0;
+    else if(mjj < 1200) typeSelAux9 = 1;
+    else if(mjj < 1800) typeSelAux9 = 2;
+    else                typeSelAux9 = 3;
+
+    int typeSelAux10 = -1;
+    if     (Rpt < -2.2) typeSelAux10 = 0;
+    else if(Rpt < -2.0) typeSelAux10 = 1;
+    else if(Rpt < -1.8) typeSelAux10 = 2;
+    else if(Rpt < -1.6) typeSelAux10 = 3;
+    else if(Rpt < -1.4) typeSelAux10 = 4;
+    else if(Rpt < -1.2) typeSelAux10 = 5;
+    else if(Rpt < -1.0) typeSelAux10 = 6;
+    else if(Rpt < -0.8) typeSelAux10 = 7;
+    else if(Rpt < -0.6) typeSelAux10 = 8;
+    else if(Rpt < -0.4) typeSelAux10 = 9;
+    else if(Rpt < -0.2) typeSelAux10 = 10;
+    else if(Rpt <  0.0) typeSelAux10 = 11;
+    else if(Rpt <  0.2) typeSelAux10 = 12;
+    else if(Rpt <  0.4) typeSelAux10 = 13;
+    else if(Rpt <  0.6) typeSelAux10 = 14;
+    else if(Rpt <  0.8) typeSelAux10 = 15;
+    else if(Rpt <  1.0) typeSelAux10 = 16;
+    else if(Rpt <  2.2) typeSelAux10 = 17;
+    else                typeSelAux10 = 18;
+    
+
+    int typeSelAuxRpt = -1;
+     if      (Rpt < -1.0) typeSelAuxRpt = 0;
+     else if (Rpt < 0.0) typeSelAuxRpt = 1;
+     else if (Rpt < 1.0) typeSelAuxRpt = 2;
+     else if (Rpt < 1.5) typeSelAuxRpt = 3;
+     else if (Rpt < 2.0) typeSelAuxRpt = 4;
+     else if (Rpt < 2.5) typeSelAuxRpt = 5;
+     else                 typeSelAuxRpt = 6;
+
+//    int typeSelAux11 = -1;
+//    if      (detajj < 2.78) typeSelAux11 = 0;   
+//    else if (detajj < 3.06) typeSelAux11 = 1;   
+//    else if (detajj < 3.34) typeSelAux11 = 2;   
+//    else if (detajj < 3.62) typeSelAux11 = 3;   
+//    else if (detajj < 3.90) typeSelAux11 = 4;   
+//    else if (detajj < 4.18) typeSelAux11 = 5;   
+//    else if (detajj < 4.46) typeSelAux11 = 6;   
+//    else if (detajj < 4.74) typeSelAux11 = 7;  
+//    else if (detajj < 5.02) typeSelAux11 = 8;  
+//    else if (detajj < 5.30) typeSelAux11 = 9;  
+//    else if (detajj < 5.58) typeSelAux11 = 10;  
+//    else if (detajj < 5.86) typeSelAux11 = 11;  
+//    else if (detajj < 6.14) typeSelAux11 = 12;  
+//    else if (detajj < 6.42) typeSelAux11 = 13;  
+//    else if (detajj < 6.70) typeSelAux11 = 14;  
+//    else if (detajj < 6.98) typeSelAux11 = 15;  
+//    else if (detajj < 7.26) typeSelAux11 = 16;  
+//    else if (detajj < 7.54) typeSelAux11 = 17;  
+//    else if (detajj < 7.82) typeSelAux11 = 18;  
+//    else if (detajj < 8.10) typeSelAux11 = 19;  
+//    else if (detajj < 8.38) typeSelAux11 = 20; 
+//    else if (detajj < 8.66) typeSelAux11 = 21;  
+//    else if (detajj < 8.94) typeSelAux11 = 22; 
+//    else if (detajj < 9.22) typeSelAux11 = 23;  
+//    else                    typeSelAux11 = 24;  
+
+
+  int typeSelAux11 = -1;
+   if      (detajj < 3.34) typeSelAux11 = 0;
+   else if (detajj < 3.90) typeSelAux11 = 1;
+   else if (detajj < 4.46) typeSelAux11 = 2;
+   else if (detajj < 5.02) typeSelAux11 = 3;
+   else if (detajj < 5.58) typeSelAux11 = 4;
+   else if (detajj < 6.14) typeSelAux11 = 5;
+   else if (detajj < 6.70) typeSelAux11 = 6;
+   else if (detajj < 7.26) typeSelAux11 = 7;
+   else if (detajj < 8.10) typeSelAux11 = 8;
+   else if (detajj < 8.66) typeSelAux11 = 9;
+   else                    typeSelAux11 = 10;
+
+   int typeSelAux13 = -1;
+    if      (detajj < 2.78) typeSelAux13 = 0;
+    else if (detajj < 3.34) typeSelAux13 = 1;
+    else if (detajj < 3.90) typeSelAux13 = 2;
+    else if (detajj < 4.18) typeSelAux13 = 3;
+    else if (detajj < 4.46) typeSelAux13 = 4;
+    else if (detajj < 5.02) typeSelAux13 = 5;
+    else if (detajj < 5.58) typeSelAux13 = 6;
+    else if (detajj < 5.86) typeSelAux13 = 7;
+    else if (detajj < 6.14) typeSelAux13 = 8;
+    else if (detajj < 6.70) typeSelAux13 = 9;
+    else if (detajj < 7.26) typeSelAux13 = 10;
+    else if (detajj < 7.82) typeSelAux13 = 11;
+    else if (detajj < 8.10) typeSelAux13 = 12;
+    else if (detajj < 8.66) typeSelAux13 = 13;
+    else if (detajj < 8.94) typeSelAux13 = 14;
+    else if (detajj < 9.22) typeSelAux13 = 15;
+    else                    typeSelAux13 = 16;
+  
+  int typeSelAux12 = -1;
+   if      (dphijj < 0.30) typeSelAux12 = 0;
+   else if (dphijj < 0.60) typeSelAux12 = 1;
+   else if (dphijj < 0.90) typeSelAux12 = 2;
+   else if (dphijj < 1.20) typeSelAux12 = 3;
+   else if (dphijj < 1.50) typeSelAux12 = 4;
+   else if (dphijj < 1.80) typeSelAux12 = 5;
+   else if (dphijj < 2.10) typeSelAux12 = 6;
+   else if (dphijj < 2.40) typeSelAux12 = 7;
+   else if (dphijj < 2.70) typeSelAux12 = 8;
+   else if (dphijj < 3.00) typeSelAux12 = 9;
+   else                    typeSelAux12 = 10;
+
+   int typeSelAux14 = -1;
+    if      (detajj < 4.0) typeSelAux14 = 0;
+    else if (detajj < 5.0) typeSelAux14 = 1;
+    else if (detajj < 6.0) typeSelAux14 = 2;
+    else if (detajj < 7.0) typeSelAux14 = 3;
+    else if (detajj < 8.0) typeSelAux14 = 4;
+    else                   typeSelAux14 = 5;
+
+    //For WZ
+
+    int typeSelAux15 = -1;
+    if     (mjj < 1200 ) typeSelAux15 = 0;
+    else                 typeSelAux15 = 1;
+    
+
+    int typeSelAux16 = -1;
+    if     (MT < 400 ) typeSelAux16 = 0;
+    else if(MT < 750 ) typeSelAux16 = 1;
+    else if(MT < 1050) typeSelAux16 = 2;
+    else if(MT < 1350) typeSelAux16 = 3;
+    else               typeSelAux16 = 4;
+
+  if(var == 30){ // VBS EFT M01
+    return (float)(typeSelAux6); ;
   }
-  else if(var == 32 || var == 33){ // VBS BDT pol v0 2D
-    float xBDT0Bins[4] = {-0.040, 0.470, 0.760, 9.000};
-    //float xBDT1Bins[6] = {-0.310,-0.070, 0.140, 0.350, 0.570, 9.000}; // v8
-    //float xBDT2Bins[6] = {-0.220, 0.100, 0.330, 0.510, 0.650, 9.000}; // v8
-    //float xBDT1Bins[6] = {-0.320,-0.070, 0.140, 0.350, 0.570, 9.000}; // v7
-    //float xBDT2Bins[6] = {-0.220, 0.100, 0.330, 0.500, 0.650, 9.000}; // v7
-    float xBDT1Bins[6] = {-0.190, 0.040, 0.210, 0.370, 0.550, 9.000}; // v6
-    float xBDT2Bins[6] = {-0.180, 0.140, 0.370, 0.540, 0.680, 9.000}; // v6
-
-    int typeSelAux0 = -1;
-    if     (bdt_inc < xBDT0Bins[0]) typeSelAux0 = 0;
-    else if(bdt_inc < xBDT0Bins[1]) typeSelAux0 = 1;
-    else if(bdt_inc < xBDT0Bins[2]) typeSelAux0 = 2;
-    else                            typeSelAux0 = 3;
-
-    int typeSelAux1 = -1;
-    if     (bdt_pol0 < xBDT1Bins[0]) typeSelAux1 = 0;
-    else if(bdt_pol0 < xBDT1Bins[1]) typeSelAux1 = 1;
-    else if(bdt_pol0 < xBDT1Bins[2]) typeSelAux1 = 2;
-    else if(bdt_pol0 < xBDT1Bins[3]) typeSelAux1 = 3;
-    else if(bdt_pol0 < xBDT1Bins[4]) typeSelAux1 = 4;
-    else                             typeSelAux1 = 5;
-
-    int typeSelAux2 = -1;
-    if     (bdt_pol1 < xBDT2Bins[0]) typeSelAux2 = 0;
-    else if(bdt_pol1 < xBDT2Bins[1]) typeSelAux2 = 1;
-    else if(bdt_pol1 < xBDT2Bins[2]) typeSelAux2 = 2;
-    else if(bdt_pol1 < xBDT2Bins[3]) typeSelAux2 = 3;
-    else if(bdt_pol1 < xBDT2Bins[4]) typeSelAux2 = 4;
-    else                             typeSelAux2 = 5;
-
-    float typeSelAux = -1.0;
-    if     (var == 32) typeSelAux = (float)(6*typeSelAux0 + typeSelAux1);
-    else if(var == 33) typeSelAux = (float)(6*typeSelAux0 + typeSelAux2);
-
-    return (float)(typeSelAux);
+  else if(var == 31){ // VBS EFT M1T
+    return (float)(typeSelAux7);
   }
+  else if(var == 32){ // VBS EFT MT
+    return (float)(typeSelAux8);
+  }
+  else if(var == 33){ // VBS EFT mT vs mjj
+    return (float)(typeSelAux8+5*typeSelAux9);
+  }
+  else if(var == 34){ // VBS EFT  M01 vs mjj
+    return (float)(typeSelAux6+9*typeSelAux9);
+  }
+  else if(var == 35){ // VBS EFT M1T vs mjj
+    return (float)(typeSelAux7+9*typeSelAux9);
+  }
+  else if(var == 36){ // VBS EFT Rpt
+    return (float)(typeSelAux10);
+  }
+  else if(var == 37){ // VBS EFT Mo1 vs Rpt
+    return (float)(typeSelAux6+9*typeSelAuxRpt);
+  }
+  else if(var == 38){ // VBS EFT Mo1 vs detajj
+    return (float)(typeSelAux6+9*typeSelAux11);
+  }
+  else if(var == 39){ // VBS EFT Mo1 vs dphijj
+    return (float)(typeSelAux6+9*typeSelAux12);
+  }
+  else if(var == 40){ // VBS EFT Mo1 vs detajj new bins 153
+    return (float)(typeSelAux6+9*typeSelAux13);
+  }
+  else if(var == 41){ // VBS EFT Rpt and M01  bins
+    return (float)(typeSelAux6+9*typeSelAuxRpt);
+  }
+  else if(var == 42){ // VBS EFT M01 vs detajj 54 bins
+    return (float)(typeSelAux6+9*typeSelAux14);
+  }
+  else if(var == 43){ // VBS EFT M01 vs mjj for WZ
+    return (float)(typeSelAux15+2*typeSelAux16);
+  } 
+  else if(var == 44){ // VBS mjj WZ btagged
   return 0.0;
+  }
+
+  return 0.0; // fallback for var >= 30
+}
+return 0.0; // fallback for all other var values
 }
 
 
@@ -1763,6 +1916,7 @@ float compute_jet_lepton_var(Vec_f pt, Vec_f eta, Vec_f phi, Vec_f mass,
   else if(var == 6) theVar = fabs(p4momVV.Eta()-p2.Eta());
   else if(var == 7) theVar = (p4momVV.Pt()-(p1+p2).Pt())/(p1+p2).Pt();
   else if(var == 8) theVar = deltaPhi(p4momJJ.Phi(), p4momLL.Phi());
+  else if(var == 9)  theVar = std::log10((p4mom[0].Pt()*p4mom[1].Pt())/(p1.Pt()*p2.Pt()));
   return theVar;
 }
 
@@ -2728,4 +2882,238 @@ int print_info(const UInt_t run, const UInt_t lumi, const ULong64_t event){
   printf("INFO: %d %d %llu\n",run,lumi,event);
 
   return 1;
+}
+
+// Transverse mass variables for EFT
+
+ Vec_f Getpz(const Vec_f& pt, const Vec_f& eta) {
+ const auto n = std::min(pt.size(), eta.size());
+ Vec_f pz(n);
+ for (size_t i = 0; i < n; i++) {
+   pz[i] = pt[i] * std::sinh(eta[i]);
+ }
+ return pz;
+ }
+
+ Vec_f Getpx(const Vec_f& pt, const Vec_f& phi) {
+ const auto n = std::min(pt.size(), phi.size());
+ Vec_f px(n);
+ for (size_t i = 0; i < n; i++) {
+   px[i] = pt[i] * std::cos(phi[i]);
+ }
+ return px;
+ }
+
+ Vec_f Getpy(const Vec_f& pt, const Vec_f& phi) {
+ const auto n = std::min(pt.size(), phi.size());
+ Vec_f py(n);
+ for (size_t i = 0; i < n; i++) {
+   py[i] = pt[i] * std::sin(phi[i]);
+ }
+ return py;
+ }
+
+
+
+float Get_MT(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const Vec_f& mu_mass, const Vec_f& mu_pz,
+                     const Vec_f& el_pt, const Vec_f& el_eta, const Vec_f& el_phi, const Vec_f& el_mass, const Vec_f& el_pz,
+                      const float metpT,  const float metphi, const float mll,  const float ptll, unsigned int var){
+   if(mu_pt.size() + el_pt.size() != 2) return 0;
+
+   float pt[2], eta[2], phi[2], mass[2], pz[2];
+   if(mu_pt.size() == 2){
+       pt[0] = mu_pt[0]; eta[0] = mu_eta[0]; phi[0] = mu_phi[0]; mass[0] = mu_mass[0]; pz[0] = mu_pz[0];
+       pt[1] = mu_pt[1]; eta[1] = mu_eta[1]; phi[1] = mu_phi[1]; mass[1] = mu_mass[1]; pz[1] = mu_pz[1];
+   }
+   else if(el_pt.size() == 2){
+       pt[0] = el_pt[0]; eta[0] = el_eta[0]; phi[0] = el_phi[0]; mass[0] = el_mass[0]; pz[0] = el_pz[0];
+       pt[1] = el_pt[1]; eta[1] = el_eta[1]; phi[1] = el_phi[1]; mass[1] = el_mass[1]; pz[1] = el_pz[1];
+   }
+   else if(mu_pt.size() == 1 && el_pt.size() == 1){
+       pt[0] = mu_pt[0]; eta[0] = mu_eta[0]; phi[0] = mu_phi[0]; mass[0] = mu_mass[0]; pz[0] = mu_pz[0];
+       pt[1] = el_pt[0]; eta[1] = el_eta[0]; phi[1] = el_phi[0]; mass[1] = el_mass[0]; pz[1] = el_pz[0];
+   }
+   else {
+      return 0;
+   }
+    
+    float px1 = pt[0]*cos(phi[0]);  
+    float py1 = pt[0]*sin(phi[0]);
+    float px2 = pt[1]*cos(phi[1]);  
+    float py2 = pt[1]*sin(phi[1]);
+ //   float pzmiss = metpT*sinh(metphi);
+    float px = px1 + px2;
+    float py = py1 + py2;
+    float pztot = pz[0] + pz[1];
+    float E1 = sqrt(pt[0]*pt[0] + pz[0]*pz[0] + mass[0]*mass[0]);
+    float E2 = sqrt(pt[1]*pt[1] + pz[1]*pz[1] + mass[1]*mass[1]);
+    float E = E1 + E2;
+    float METx = metpT*cos(metphi);
+    float METy = metpT*sin(metphi);
+
+//    float mll2 = E*E - (px*px + py*py + pztot*pztot);   
+//    mll2 = max(0.f, mll2);
+//    float ptll2 = px*px + py*py;
+//    float ETll  = sqrt(mll2 + ptll2);
+//    float mt2 = mll2 + 2*(ETll*metpT - (px*METx + py*METy));
+//    mt2 = max(0.f, mt2);
+//    float mt = sqrt(mt2);
+
+
+// Transverse mass
+    
+    float MTfirst = E1+E2+metpT;
+    float MTsecond = pztot;
+    float MT = sqrt(MTfirst*MTfirst - MTsecond*MTsecond);
+
+// M01  variables
+    float M01first = (pt[0] + pt[1] + metpT)*(pt[0] + pt[1] + metpT);
+    float M01second = (px1 + px2 + METx)*(px1 + px2 + METx) + (py1 + py2 + METy)*(py1 + py2 + METy);
+    float M01 = sqrt(M01first - M01second);
+
+// M1T variables
+    float M1Tfirst = sqrt(mll*mll + ptll*ptll) + metpT;
+    float M1Tsecond = (px + METx)*(px + METx) + (py + METy)*(py + METy);
+    float M1T = sqrt(M1Tfirst*M1Tfirst - M1Tsecond);
+    double theVar = 0;
+    if     (var == 1) theVar = MT;
+    else if(var == 2) theVar = M01;
+    else if(var == 3) theVar = M1T;
+    else if(var == 4) theVar = log(MT);
+    else if(var == 5) theVar = log(M01);
+    else if(var == 6) theVar = log(M1T);
+
+    return theVar;
+  }
+
+  float Get_mww(const Vec_f& lepton_pt,
+              const Vec_f& lepton_eta,
+              const Vec_f& lepton_phi,
+              const Vec_f& lepton_mass,
+              const Vec_f& lepton_pz,
+              const float metpT,
+              const float metphi)
+{
+    if (lepton_pt.size() != 2) return -999.f;
+
+    const double px1 = lepton_pt[0] * std::cos(lepton_phi[0]);
+    const double py1 = lepton_pt[0] * std::sin(lepton_phi[0]);
+
+    const double px2 = lepton_pt[1] * std::cos(lepton_phi[1]);
+    const double py2 = lepton_pt[1] * std::sin(lepton_phi[1]);
+
+
+    const double E1 = std::sqrt(lepton_pt[0]*lepton_pt[0]
+                              + lepton_pz[0]*lepton_pz[0]
+                              + lepton_mass[0]*lepton_mass[0]);
+
+    const double E2 = std::sqrt(lepton_pt[1]*lepton_pt[1]
+                              + lepton_pz[1]*lepton_pz[1]
+                              + lepton_mass[1]*lepton_mass[1]);
+
+
+    const double metx = metpT * std::cos(metphi);
+    const double mety = metpT * std::sin(metphi);
+
+
+    // MET treated as invisible system: E = MET, pz = 0
+    const double Etot  = E1 + E2 + metpT;
+
+    const double pxtot = px1 + px2 + metx;
+    const double pytot = py1 + py2 + mety;
+    const double pztot = lepton_pz[0] + lepton_pz[1];
+
+
+    const double m2 = Etot*Etot - pxtot*pxtot - pytot*pytot - pztot*pztot;
+    return static_cast<float>(std::sqrt(std::max(0.0, m2)));
+}
+
+
+
+float Get_mwz(const Vec_f& lepton_pt,
+              const Vec_f& lepton_eta,
+              const Vec_f& lepton_phi,
+              const Vec_f& lepton_mass,
+              const Vec_f& lepton_pz,
+              const float metpT,
+              const float metphi)
+{
+    if (lepton_pt.size() != 3) return -999.f;
+
+
+    const double px1 = lepton_pt[0] * std::cos(lepton_phi[0]);
+    const double py1 = lepton_pt[0] * std::sin(lepton_phi[0]);
+
+    const double px2 = lepton_pt[1] * std::cos(lepton_phi[1]);
+    const double py2 = lepton_pt[1] * std::sin(lepton_phi[1]);
+
+    const double px3 = lepton_pt[2] * std::cos(lepton_phi[2]);
+    const double py3 = lepton_pt[2] * std::sin(lepton_phi[2]);
+
+
+    const double E1 = std::sqrt(lepton_pt[0]*lepton_pt[0]
+                              + lepton_pz[0]*lepton_pz[0]
+                              + lepton_mass[0]*lepton_mass[0]);
+
+    const double E2 = std::sqrt(lepton_pt[1]*lepton_pt[1]
+                              + lepton_pz[1]*lepton_pz[1]
+                              + lepton_mass[1]*lepton_mass[1]);
+
+    const double E3 = std::sqrt(lepton_pt[2]*lepton_pt[2]
+                              + lepton_pz[2]*lepton_pz[2]
+                              + lepton_mass[2]*lepton_mass[2]);
+
+
+    const double metx = metpT * std::cos(metphi);
+    const double mety = metpT * std::sin(metphi);
+
+    // MET treated as invisible system: E = MET, pz = 0
+    const double Etot  = E1 + E2 + E3 + metpT;
+
+    const double pxtot = px1 + px2 + px3 + metx;
+    const double pytot = py1 + py2 + py3 + mety;
+    const double pztot = lepton_pz[0] + lepton_pz[1] + lepton_pz[2];
+
+
+    const double m2 = Etot*Etot - pxtot*pxtot - pytot*pytot - pztot*pztot;
+    return static_cast<float>(std::sqrt(std::max(0.0, m2)));
+}
+
+
+float Get_MTwz(const Vec_f& mu_pt, const Vec_f& mu_eta, const Vec_f& mu_phi, const Vec_f& mu_mass, const Vec_f& mu_pz,
+       const Vec_f& el_pt, const Vec_f& el_eta, const Vec_f& el_phi, const Vec_f& el_mass, const Vec_f& el_pz, 
+       const float metpT, const float metphi, unsigned int var)
+{
+    if(mu_pt.size() + el_pt.size() != 3) return 0.0f;
+
+    float Etot = 0.0;
+    float pztot = 0.0;
+
+    // muons
+    for(unsigned int i = 0; i < mu_pt.size(); i++){
+
+        TLorentzVector mu;
+        mu.SetPtEtaPhiM(mu_pt[i], mu_eta[i], mu_phi[i], mu_mass[i]);
+
+        Etot += mu.E();
+        pztot += mu.Pz();
+    }
+
+    for(unsigned int i = 0; i < el_pt.size(); i++){
+
+        TLorentzVector el;
+        el.SetPtEtaPhiM(el_pt[i], el_eta[i], el_phi[i], el_mass[i]);
+
+        Etot += el.E();
+        pztot += el.Pz();
+    }
+
+    Etot += metpT;
+
+    float MTwz = sqrt(Etot*Etot - pztot*pztot);
+
+    if(var == 1) return MTwz;
+    else if(var == 2) return 0.0;
+    else if(var == 3) return 0.0;
+    else return 0.0;
 }
